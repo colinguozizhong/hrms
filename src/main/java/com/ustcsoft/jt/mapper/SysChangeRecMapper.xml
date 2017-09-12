@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysChangeRecMapper">
+	<!-- 功能说明:带分页的查询人员异动信息列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysChangeRecVO" parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+	     SELECT 
+			s.ID AS changeReocrdId,
+			s.EMP_ID AS empId,
+			s.TYPE_ID AS typeId,
+			s.OLD_DEPT_NO AS oldDeptNo,
+			s.OLD_JOB AS oldJob,
+			s.OLD_STATION_ID AS oldStationId,
+			s.OLD_STATION_GRAGE AS oldStationGrade,
+			s.NEW_DEPT_NO AS newDeptNo,
+			s.NEW_JOB AS newJob,
+			s.NEW_STATION_ID AS newStationId,
+			s.NEW_STATION_GRAGE AS newStationGrade,
+			s.CHANGE_REASON AS changeReason,
+			s.CHANGE_DATE AS changeDate,
+			s.BE_ON_TIME AS beOnTime,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			s1.STATION_NAME AS oldStationName,
+			s2.STATION_NAME AS newStationName,
+			o1.ORG_NAME AS oldDeptName,
+			o2.ORG_NAME AS newDeptName,
+			e.EMP_NAME AS name,
+			c.TYPE_NAME AS typeName,
+			h.VERIFY_DATE AS verifyDate
+		FROM T_CHANGE_REC s
+		left join T_CHANGE_HEAD h on h.VOUCHER_NO = s.VOUCHER_NO
+		LEFT JOIN T_STATION s1
+		ON s.OLD_STATION_ID=s1.STATION_ID
+		LEFT JOIN T_STATION s2
+		ON s.NEW_STATION_ID=s2.STATION_ID
+		LEFT JOIN M_ORG o1
+		ON s.OLD_DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON s.NEW_DEPT_NO=o2.ORG_ID
+		LEFT JOIN T_EMP e
+		ON s.EMP_ID=e.EMP_ID
+		LEFT JOIN T_CHANGE_TYPE c
+		ON s.TYPE_ID=c.TYPE_ID
+		WHERE 1=1
+		<if test="changeRec.typeId != null and changeRec.typeId != ''">
+				and s.TYPE_ID = #{changeRec.typeId}
+		</if>
+		<if test="changeRec.changeDateStart != null and changeRec.changeDateStart != ''">
+				<![CDATA[and to_char(s.CHANGE_DATE, 'YYYY-MM-DD') >= #{changeRec.changeDateStart}]]>
+		</if>
+		<if test="changeRec.changeDateEnd != null and changeRec.changeDateEnd != ''">
+				<![CDATA[and to_char(s.CHANGE_DATE, 'YYYY-MM-DD') <= #{changeRec.changeDateEnd}]]>
+		</if>
+		<if test="changeRec.oldDeptNo != null and changeRec.oldDeptNo != ''">
+				and s.OLD_DEPT_NO = #{changeRec.oldDeptNo}
+		</if>
+		<if test="changeRec.newDeptNo != null and changeRec.newDeptNo != ''">
+				and s.NEW_DEPT_NO = #{changeRec.newDeptNo}
+		</if>
+		ORDER BY s.CREATE_DATE DESC
+	</select>
+	
+		<!-- 功能说明:带分页的查询人员异动申请列表 -->
+	<select id="queryApplyWithPage" resultType="com.ustcsoft.system.model.SysChangeRecVO" parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+	     SELECT 
+			h.VOUCHER_NO AS headId,
+			h.STATUS AS status,
+			h.remark AS remark,
+			o1.ORG_NAME AS orgName,
+			d.ID AS detailId,
+			d.DEPT_NO AS oldDeptNo,
+			d.JOB AS oldJob,
+			d.TYPE_ID AS typeId,
+			d.STATION_CODE AS oldStationId,
+			d.CHANGE_REA AS changeReason,
+			d.CHANGE_DATE AS changeDate,
+			s1.STATION_NAME AS oldStationName,
+			o1.ORG_NAME AS oldDeptName,
+			d.EMP_ID AS empId,
+			e.EMP_NAME AS name,
+			c.TYPE_NAME AS typeName,
+			d.INFO1 as info1,
+			d.INFO2 as info2,
+			d.INFO3 as info3,
+			d.INFO4 as info4,
+			d.INFO5 as info5,
+			d.INFO6 as info6
+		FROM T_CHANGE_HEAD h
+		LEFT JOIN T_CHANGE_DETAIL d
+		ON h.VOUCHER_NO=d.VOUCHER_NO
+		LEFT JOIN T_STATION s1
+		ON d.STATION_CODE=s1.STATION_ID
+		LEFT JOIN M_ORG o1
+		ON d.DEPT_NO=o1.ORG_ID
+		left join M_ORG o2 
+		on h.ORG_ID = o2.ORG_ID
+		LEFT JOIN T_EMP e
+		ON d.EMP_ID=e.EMP_ID
+		LEFT JOIN T_CHANGE_TYPE c
+		ON d.TYPE_ID=c.TYPE_ID
+		WHERE  1=1
+		 <if test="changeRec.orgId != null and changeRec.orgId != ''">
+				and o2.BUSINESS_ID like '%${changeRec.orgId}%'
+		</if>
+		<if test="changeRec.name != null and changeRec.name != ''">
+				and e.EMP_NAME like '%${changeRec.name}%'
+		</if>
+		<if test="changeRec.typeId != null and changeRec.typeId != ''">
+				and d.TYPE_ID = #{changeRec.typeId}
+		</if>
+		 <if test="changeRec.oldDeptNo != null and changeRec.oldDeptNo != ''">
+				and o1.BUSINESS_ID like '%${changeRec.oldDeptNo}%'
+		</if>
+		<if test="changeRec.changeDateStart != null and changeRec.changeDateStart != ''">
+				<![CDATA[and to_char(d.CHANGE_DATE, 'YYYY-MM-DD') >= #{changeRec.changeDateStart}]]>
+		</if>
+		<if test="changeRec.changeDateEnd != null and changeRec.changeDateEnd != ''">
+				<![CDATA[and to_char(d.CHANGE_DATE, 'YYYY-MM-DD') <= #{changeRec.changeDateEnd}]]>
+		</if>
+		<if test="changeRec.status != null and changeRec.status != ''">
+				and h.STATUS = #{changeRec.status}
+		</if>
+		ORDER BY h.CREATE_DATE DESC
+	</select>
+	
+	<!--  功能说明:添加人员异动记录）-->
+	<insert id="insertChangeRecord"  parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+		INSERT INTO T_CHANGE_REC(
+			 ID
+			,EMP_ID
+			,VOUCHER_NO
+			,TYPE_ID
+			,OLD_DEPT_NO
+			,OLD_JOB
+			,OLD_STATION_ID
+			,OLD_STATION_GRAGE
+			,NEW_DEPT_NO
+			,NEW_JOB
+			,NEW_STATION_ID
+			,NEW_STATION_GRAGE
+			,CHANGE_REASON
+			,CHANGE_DATE
+			,BE_ON_TIME
+			,CREATE_PER
+			,CREATE_DATE
+		) 
+		VALUES 
+		(
+			#{changeReocrdId},
+			#{empId},
+			#{headId},
+			#{typeId},
+			#{oldDeptNo},
+			#{oldJob},
+			#{oldStationId},
+			#{oldStationGrade},
+			#{newDeptNo},
+			#{newJob},
+			#{newStationId},
+			#{newStationGrade},
+			#{changeReason}
+			<![CDATA[,to_date(#{changeDate},'YYYY-MM-DD hh24:mi:ss')]]>,
+			#{beOnTime},
+			#{creater}
+			<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+		)	
+		
+	</insert>
+	
+	<!--  功能说明:添加人员异动申请（表头信息）-->
+	<insert id="insertChangeHead"  parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+		INSERT INTO T_CHANGE_HEAD(
+			VOUCHER_NO
+			<if test="status != null and status != ''">
+				,STATUS
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,ORG_ID
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+			<if test="remark != null and remark != ''">
+				,REMARK
+			</if>
+		) 
+		VALUES 
+		(
+			#{headId}
+			<if test="status != null and status != ''">
+				,#{status}
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,#{orgId}
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="remark != null and remark != ''">
+				,#{remark}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:审批异动申请	-->
+	<update id="updateHeadInfo"  parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+				UPDATE T_CHANGE_HEAD
+					<set>
+						<if test="status != null and status != ''">
+							STATUS=#{status},
+						</if>
+						<if test="verifyPer != null and verifyPer != ''">
+							VERIFY_PER=#{verifyPer},
+						</if>
+						<if test="verifyDate != null and verifyDate != ''">
+						<![CDATA[VERIFY_DATE=to_date(#{verifyDate},'YYYY-MM-DD hh24:mi:ss'),]]>
+						</if>
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:添加人员异动申请（详细信息）  注意info6统一存时间-->
+	<insert id="insertChangeDetail"  parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+		INSERT INTO T_CHANGE_DETAIL(
+			ID
+			<if test="headId != null and headId != ''">
+				,VOUCHER_NO
+			</if>
+			<if test="empId != null and empId != ''">
+				,EMP_ID
+			</if>
+			<if test="oldDeptNo != null and oldDeptNo != ''">
+				,DEPT_NO
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,STATION_CODE
+			</if>
+			<if test="oldJob != null and oldJob != ''">
+				,JOB
+			</if>
+			<if test="oldPosition != null and oldPosition != ''">
+				,POSITION_CODE
+			</if>
+			<if test="typeId != null and typeId != ''">
+				,TYPE_ID
+			</if>
+			<if test="changeDate != null and changeDate != ''">
+				,CHANGE_DATE
+			</if>
+			<if test="changeReason != null and changeReason != ''">
+				,CHANGE_REA
+			</if>
+			<if test="info1 != null and info1 != ''">
+				,INFO1
+			</if>
+			<if test="info2 != null and info2 != ''">
+				,INFO2
+			</if>
+			<if test="info3 != null and info3 != ''">
+				,INFO3
+			</if>
+			<if test="info4 != null and info4 != ''">
+				,INFO4
+			</if>
+			<if test="info5 != null and info5 != ''">
+				,INFO5
+			</if>
+			<if test="info6 != null and info6 != ''">
+				,INFO6
+			</if>
+		) 
+		VALUES 
+		(
+			#{detailId}
+			<if test="headId != null and headId != ''">
+				,#{headId}
+			</if>
+			<if test="empId != null and empId != ''">
+				,#{empId}
+			</if>
+			<if test="oldDeptNo != null and oldDeptNo != ''">
+				,#{oldDeptNo}
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,#{oldStationId}	
+			</if>
+			<if test="oldJob != null and oldJob != ''">
+				,#{oldJob}
+			</if>
+			<if test="oldPosition != null and oldPosition != ''">
+				,#{oldPosition}
+			</if>
+			<if test="typeId != null and typeId != ''">
+				,#{typeId}
+			</if>
+			<if test="changeDate != null and changeDate != ''">
+				<![CDATA[,to_date(#{changeDate},'YYYY-MM-DD')]]>
+			</if>
+			<if test="changeReason != null and changeReason != ''">
+				,#{changeReason}
+			</if>
+			<if test="info1 != null and info1 != ''">
+				,#{info1}
+			</if>
+			<if test="info2 != null and info2 != ''">
+				,#{info2}
+			</if>
+			<if test="info3 != null and info3 != ''">
+				,#{info3}
+			</if>
+			<if test="info4 != null and info4 != ''">
+				,#{info4}
+			</if>
+			<if test="info5 != null and info5 != ''">
+				,#{info5}
+			</if>
+			<if test="info6 != null and info6 != ''">
+				<![CDATA[,to_date(#{info6},'YYYY-MM-DD')]]>
+			</if>
+		)	
+	</insert>
+	
+	<!-- 功能说明:加载一条人员异动信息 -->
+	<select id="load" resultType="com.ustcsoft.system.model.SysChangeRecVO" parameterType="java.lang.String">
+	     SELECT 
+			s.ID AS id,
+			s.EMP_ID AS empId,
+			s.TYPE_ID AS typeId,
+			s.OLD_DEPT_NO AS oldDeptNo,
+			s.OLD_JOB AS oldJob,
+			s.OLD_STATION_ID AS oldStationId,
+			s.OLD_STATION_GRAGE AS oldStationGrade,
+			s.NEW_DEPT_NO AS newDeptNo,
+			s.NEW_JOB AS newJob,
+			s.NEW_STATION_ID AS newStationId,
+			s.NEW_STATION_GRAGE AS newStationGrade,
+			s.CHANGE_REASON AS changeReason,
+			s.CHANGE_DATE AS changeDate,
+			s.BE_ON_TIME AS beOnTime,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			s1.STATION_NAME AS oldStationName,
+			s2.STATION_NAME AS newStationName,
+			o1.ORG_NAME AS oldDeptName,
+			o2.ORG_NAME AS newDeptName,
+			e.EMP_NAME AS name,
+			c.TYPE_NAME AS typeName
+		FROM T_CHANGE_REC s
+		LEFT JOIN T_STATION s1
+		ON s.OLD_STATION_ID=s1.STATION_ID
+		LEFT JOIN T_STATION s2
+		ON s.NEW_STATION_ID=s2.STATION_ID
+		LEFT JOIN M_ORG o1
+		ON s.OLD_DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON s.NEW_DEPT_NO=o2.ORG_ID
+		LEFT JOIN T_EMP e
+		ON s.EMP_ID=e.EMP_ID
+		LEFT JOIN T_CHANGE_TYPE c
+		ON s.TYPE_ID=c.TYPE_ID
+		WHERE ID = #{id}
+	</select>
+	<!-- 功能说明:加载部门名称 -->
+	<select id="loadDeptName" resultType="com.ustcsoft.system.model.SysChangeRecVO" parameterType="java.lang.String">
+	     SELECT 
+	     ORG_NAME AS newDeptNo
+	     FROM　M_ORG
+		WHERE ORG_ID = #{id}
+	</select>
+	
+	<!--  功能说明:根据id删除人员异动申请(head表)-->
+	<delete id="deleteChangeRec" parameterType="java.lang.String">
+		DELETE FROM T_CHANGE_HEAD
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	
+	<!--  功能说明:根据id删除人员异动申请(detail表)-->
+	<delete id="deleteChangeRecDetail" parameterType="java.lang.String">
+		DELETE FROM T_CHANGE_DETAIL
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	<!--  功能说明:提交人员异动申请单-->
+	<update id="submitChangeRec"  parameterType="java.lang.String">
+				UPDATE T_CHANGE_HEAD
+					<set>
+							STATUS=1
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:更新人员异动申请-->
+	<update id="updateChangeRec"  parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+		UPDATE T_CHANGE_DETAIL
+			<set>
+				<if test="empId != null">
+					EMP_ID=#{empId},
+				</if>
+				<if test="oldDeptNo != null">
+					DEPT_NO=#{oldDeptNo},
+				</if>
+				<if test="oldStationId != null">
+					STATION_CODE=#{oldStationId},
+				</if>
+				<if test="oldJob != null">
+					JOB=#{oldJob},
+				</if>
+				<if test="oldPosition != null">
+					POSITION_CODE=#{oldPosition},
+				</if>
+				<if test="typeId != null">
+					TYPE_ID=#{typeId},
+				</if>
+				<if test="changeDate != null">
+					<![CDATA[CHANGE_DATE=to_date(#{changeDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="changeReason != null">
+					CHANGE_REA=#{changeReason},
+				</if>
+				<if test="info1 != null">
+					INFO1=#{info1},
+				</if>
+				<if test="info2 != null">
+					INFO2=#{info2},
+				</if>
+				<if test="info3 != null">
+					INFO3=#{info3},
+				</if>
+				<if test="info4 != null">
+					INFO4=#{info4},
+				</if>
+				<if test="info5 != null">
+					INFO5=#{info5},
+				</if>
+				<if test="info6 != null">
+					<![CDATA[INFO6=to_date(#{info6},'YYYY-MM-DD'),]]>
+				</if>
+			</set>
+		WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:审批转正异动类型时更新人员表人员状态-->
+	<update id="updateEmpStatus"  parameterType="com.ustcsoft.system.model.SystemEmpVO">
+				UPDATE T_EMP
+					<set>
+						<if test="status != null and status !=''">
+							EMP_SUTUS=#{status}
+						</if>
+					</set>
+				WHERE EMP_ID=#{id}
+	</update>
+		<!--  功能说明:根据人员ID查询异动VOUCHER_NO信息-->
+	<select id="findChangeHeadId" parameterType="java.util.List" resultType="java.lang.String" >
+		select VOUCHER_NO 
+		from T_CHANGE_DETAIL 
+		where EMP_ID in  	
+		<foreach collection="list" item="id"
+            index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</select>
+	<!--  功能说明:据异动单号删除人员异动申请信息（head表）-->
+	<delete id="deleteChangeRecByList" parameterType="java.util.List">
+		DELETE FROM T_CHANGE_HEAD
+		WHERE VOUCHER_NO IN
+		<foreach collection="list" item="id"
+            index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</delete>
+		<!--  功能说明:根据EmpId删除人员异动申请信息（detail表）-->
+	<delete id="deleteChangeRecDetailByEmpId" parameterType="java.util.List">
+		DELETE FROM T_CHANGE_DETAIL
+		WHERE EMP_ID IN
+		<foreach collection="list" item="id"
+            index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</delete>
+</mapper>

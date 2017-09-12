@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ustcsoft.jt.mapper.SysTempletMapper">
+
+	<!-- 功能说明：查询模板列表 -->
+	<select id="queryForPage" parameterType="com.ustcsoft.system.model.SysTempletVO"
+		resultType="com.ustcsoft.system.model.SysTempletVO">
+		SELECT 
+		    T.ZHU_JIAN_ID AS muBanId,
+		    T.HANG_YE_LEI_BIE AS hangYeType,
+		    C.MING_CHENG AS wenShuName,
+		    T.MO_BAN_MING_CHENG AS muBanName,
+		    T.WEN_SHU_LEI_BIE AS wenShuLeiBie,
+		    T.MO_BAN_NEI_RONG AS muBanContent
+		FROM XZZF_D_WSMB T
+		LEFT JOIN
+			  XZZF_C_XTBM c 
+	    ON
+	    	 T.WEN_SHU_LEI_BIE =c.DAI_MA and c.LEI_BIE='24'
+	   WHERE 1=1
+	    <if test=" vo!=null and vo.hangYeType != null and vo.hangYeType!= ''">
+				and T.HANG_YE_LEI_BIE = #{vo.hangYeType}
+		</if>
+		<if test=" vo!=null and vo.wenShuLeiBie != null and vo.wenShuLeiBie!= ''">
+				and T.WEN_SHU_LEI_BIE = #{vo.wenShuLeiBie}
+		</if> 
+		<if test=" vo!=null and vo.muBanName != null and vo.muBanName!= ''">
+				and T.MO_BAN_MING_CHENG like '%${vo.muBanName}%'
+		</if>
+		<if test=" vo!=null and vo.muBanId != null and vo.muBanId != ''">
+				and T.ZHU_JIAN_ID = #{vo.muBanId}
+		</if> 	 
+	</select>
+	<!-- 查询文书名称 -->
+	<select id="queryWSNameAll" parameterType="com.ustcsoft.system.model.SysTempletVO"
+		resultType="com.ustcsoft.system.model.SysTempletVO">
+		select
+		    XI_TONG_BIAN_MA_ID AS wenShuId,
+		    DAI_MA AS wenShuLeiBie,
+		    MING_CHENG AS wenShuName
+		    from XZZF_C_XTBM
+		where LEI_BIE = '24'
+		<if test=" wenShuId != null and wenShuId != ''">
+				and XI_TONG_BIAN_MA_ID = #{wenShuId}
+		</if>
+		order by pai_xu desc
+	</select>
+  	<!-- 查询关联字段列表 -->
+	<select id="findKeyWordList" parameterType="com.ustcsoft.system.model.KeyWordVO"
+		resultType="com.ustcsoft.system.model.KeyWordVO">
+	 SELECT 
+            a.ZHU_JIAN_ID as zhuJianId,
+            a.HANG_YE_LEI_BIE as hangYeLeiBie,
+            a.WEN_SHU_LEI_BIE as wenShuLeiBie,
+            c.MING_CHENG as wenShuMing,
+            a.BIAO_LEI_BIE as biaoLeiBie,
+            b.MING_CHENG as biaoMing,
+            a.GUAN_JIAN_ZI_DUAN as guanJianZiDuan,
+            a.GUAN_JIAN_ZI_MING as guanJianZiMing,
+            a.CREATER as creater,
+            a.CREATE_TIME as createTime,
+            a.UPDATER as updater,
+            a.UPDATE_TIME as updateTime,
+            a.ROW_VERSION as rowVersion_Decimal,
+            a.DEL_FLAG as delFlag,
+            a.XU_HAO as xuHao,
+            a.IS_SELECT as isSelect			
+	   FROM 
+		    XZZF_D_WSMBGJZ a left join  XZZF_C_XTBM b on a.BIAO_LEI_BIE =b.DAI_MA and b.LEI_BIE='25'
+		   left join  XZZF_C_XTBM c on a.WEN_SHU_LEI_BIE =c.DAI_MA and c.LEI_BIE='24'
+	   WHERE 
+		     a.DEL_FLAG='00'
+		     <if test=" biaoMing != null and biaoMing != ''">
+					and b.LEI_BIE='25' and UPPER(b.BIAO_MING) like UPPER('%${biaoMing}%')
+		    </if>
+		    <if test=" hangYeLeiBie != null and hangYeLeiBie  != ''">
+				and a.HANG_YE_LEI_BIE  = #{hangYeLeiBie}
+		    </if>
+		    <if test=" wenShuLeiBie != null and wenShuLeiBie != ''">
+				and a.WEN_SHU_LEI_BIE  = #{wenShuLeiBie}
+		    </if>
+		    <if test=" guanJianZiDuan != null and guanJianZiDuan != ''">
+				and UPPER(a.GUAN_JIAN_ZI_DUAN) like UPPER('%${guanJianZiDuan}%')
+		    </if>
+		    <if test=" guanJianZiMing != null and guanJianZiMing != ''">
+				and UPPER(a.GUAN_JIAN_ZI_DUAN) like UPPER('%${guanJianZiMing}%')
+		    </if>
+		    <if test=" isSelect != null and isSelect != ''">
+				and a.IS_SELECT  = #{isSelect}
+		    </if>
+			ORDER BY cast(xuHao as SIGNED)
+	</select>
+	
+	<select id="findKeyWordList1" parameterType="com.ustcsoft.system.model.KeyWordVO"
+		resultType="com.ustcsoft.system.model.KeyWordVO">
+		SELECT 	z.XU_HAO	as xuHao, 
+			z.ZHU_JIAN_ID as zhuJianId,
+			z.GUAN_JIAN_ZI_MING	as guanJianZiMing, 
+			z.GUAN_JIAN_ZI_DUAN	as guanJianZiDuan, 
+			x.WEN_SHU_MING	as wenShuMing, 
+			x.BIAO_MING	as biaoMing, 
+			z.BIAO_LEI_BIE	as biaoLeiBie,
+			trim(x.BIAO_MING)||'_'||trim(z.GUAN_JIAN_ZI_DUAN)||'_'||trim(z.XU_HAO) as guanJianZi
+		FROM XZZF_D_WSMBGJZ z 
+		LEFT JOIN XZZF_D_WSMBBGX x on x.BIAO_LEI_BIE = z.BIAO_LEI_BIE  and x.del_flag='00'
+		        <if test=" hangYeLeiBie != null and hangYeLeiBie  != ''">
+				and x.HANG_YE_LEI_BIE  = #{hangYeLeiBie}
+		       </if>
+		       <if test=" wenShuLeiBie != null and wenShuLeiBie  != ''">
+				and x.WEN_SHU_LEI_BIE  = #{wenShuLeiBie}
+		       </if>
+		WHERE  z.del_flag='00' 
+		        <if test=" hangYeLeiBie != null and hangYeLeiBie != ''">
+				    and z.HANG_YE_LEI_BIE  = #{hangYeLeiBie}
+		       </if>
+		       <if test=" wenShuLeiBie != null and wenShuLeiBie  != ''">
+				and z.WEN_SHU_LEI_BIE  = #{wenShuLeiBie}
+		       </if>
+		ORDER BY cast(z.XU_HAO as SIGNED)
+	</select>
+	
+	<select id="getWraperKey" parameterType="com.ustcsoft.system.model.WraperModelKeyVO"
+		resultType="com.ustcsoft.system.model.WraperModelKeyVO">
+	SELECT 	
+		DISTINCT GUAN_JIAN_ZI_MING	as guanJianZiMing
+	FROM	
+		XZZF_D_WSMBGJZ
+	WHERE	
+		WEN_SHU_LEI_BIE =  #{wenShuLeiBie}
+	</select>
+<!-- 功能说明:取MAX项目编码ID -->
+	<select id="findMaxZhuJanId" resultType="java.lang.String">
+		SELECT
+		MAX(a.ZHU_JIAN_ID) as zhuJianId
+		FROM
+		XZZF_D_WSMB a
+	</select>
+<!-- 功能说明：新增模板 -->
+	 <insert id="insertTemplet" parameterType="com.ustcsoft.system.model.SysTempletVO">
+		    INSERT INTO 
+		    	XZZF_D_WSMB (
+		    	ZHU_JIAN_ID,
+		    	WEN_SHU_LEI_BIE,
+		        MO_BAN_NEI_RONG,
+		        MO_BAN_MING_CHENG,
+		        HANG_YE_LEI_BIE,
+		        DEL_FLAG,
+		        CREATER,
+		        CREATE_TIME,
+		       UPDATE_TIME 
+		    )
+		    VALUES(
+		        #{muBanId},
+		        #{wenShuLeiBie},
+		        #{muBanContent},
+		        #{muBanName},
+		        #{hangYeType},
+		        #{delFlg},
+		        #{creater},
+		        #{createTime},
+		        null
+		    )
+</insert>
+	<update id="updateTemplet" parameterType="com.ustcsoft.system.model.SysTempletVO">
+		update	
+			XZZF_D_WSMB
+		set		
+				WEN_SHU_LEI_BIE = #{wenShuLeiBie},
+		    	MO_BAN_NEI_RONG =   #{muBanContent},
+		        MO_BAN_MING_CHENG = #{muBanName},
+		        HANG_YE_LEI_BIE = #{hangYeType},
+		        UPDATER = #{updater},
+		        UPDATE_TIME = #{updateTime},
+		        ROW_VERSION = #{rowVersion}
+		where	
+				ZHU_JIAN_ID =  #{muBanId}
+	</update> 
+	<!-- 删除-->
+	<delete id="deleteTemplet"  parameterType="java.lang.String">
+		delete from  
+				XZZF_D_WSMB 
+		where 
+			    ZHU_JIAN_ID = #{muBanId}
+	</delete>
+	
+	<select id="findKeyWordPerson" parameterType="java.lang.String" resultType="com.ustcsoft.system.model.KeyWordVO">
+		SELECT
+			GUAN_JIAN_ZI_MING as guanJianZiMing,
+			GUAN_JIAN_ZI_BIAN_MA as guanJianZiDuan
+		FROM XZZF_D_WSGRMBGJZ
+		WHERE GUAN_JIAN_ZI_FEN_LEI = #{value}
+	</select>
+	
+	<select id="findKeyWordPersonAll" parameterType="java.lang.String" resultType="com.ustcsoft.system.model.KeyWordVO">
+		SELECT
+			GUAN_JIAN_ZI_MING as guanJianZiMing,
+			GUAN_JIAN_ZI_BIAN_MA as guanJianZiDuan
+		FROM XZZF_D_WSGRMBGJZ
+	</select>
+	<select id="queryTempletById" parameterType="com.ustcsoft.system.model.SysTempletVO"
+		resultType="com.ustcsoft.system.model.SysTempletVO">
+		SELECT
+			MO_BAN_NEI_RONG AS muBanContent
+		FROM XZZF_D_WSMB
+		WHERE ZHU_JIAN_ID = #{muBanId}
+	</select>
+	
+</mapper>

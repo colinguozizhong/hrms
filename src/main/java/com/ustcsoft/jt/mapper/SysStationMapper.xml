@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysStationMapper">
+	
+	<!-- 功能说明:所有岗位类型的列表 -->
+	<select id="listAll" resultType="com.ustcsoft.system.model.SystemStationVO" parameterType="com.ustcsoft.system.model.SystemStationVO">
+	     SELECT 
+	      	STATION_ID AS id,
+			STATION_CODE AS stationCode,
+			STATION_NAME AS stationName,
+			STATION_GRADE AS stationGrade,
+			CREATE_PER AS creater,
+			CREATE_DATE AS createDate
+		FROM T_STATION
+	</select>
+	
+</mapper>

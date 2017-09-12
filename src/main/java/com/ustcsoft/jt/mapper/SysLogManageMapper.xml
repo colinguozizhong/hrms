@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysLogManageMapper">
+	 <!-- 功能说明:带分页的查询干部任命申请单信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysLogManageVO" parameterType="com.ustcsoft.system.model.SysLogManageVO">
+	     SELECT 
+	      	L.OPERATOR_ID AS operatorId,
+	      	L.OPERATOR_NAME AS operatorName,
+			L.CREATE_TIME AS createTime,
+			L.OPERAT_MENU AS operateMenu,
+			L.OPERAT_TYPE AS operateType,
+			L.OPERAT_CONTENT AS operateContent,
+			L.BROWSER AS browser
+	        FROM M_SYS_LOG L  
+		WHERE 1=1
+		<if test="sysLogManage.operatorName!= null and sysLogManage.operatorName!=''">
+				and L.OPERATOR_NAME like '%${sysLogManage.operatorName}%'
+		</if>
+		<if test="sysLogManage.operateType!= null and sysLogManage.operateType!=''">
+				and L.OPERAT_TYPE like '%${sysLogManage.operateType}%'
+		</if>
+		<if test="sysLogManage.operateMenu!=null and sysLogManage.operateMenu!=''">
+				and L.OPERAT_MENU like '%${sysLogManage.operateMenu}%'
+		</if>
+		<if test="sysLogManage.searchDateStart!= null and sysLogManage.searchDateStart!= ''">
+				<![CDATA[ and to_char(L.CREATE_TIME,'YYYY-MM-DD') >= #{sysLogManage.searchDateStart}]]>
+		</if>
+		<if test="sysLogManage.searchDateEnd!= null and sysLogManage.searchDateEnd!=''">
+				<![CDATA[ and to_char(L.CREATE_TIME,'YYYY-MM-DD') <= #{sysLogManage.searchDateEnd}]]>
+		</if>
+		ORDER BY L.CREATE_TIME DESC
+	</select>
+	
+	<!--  功能说明:录入操作日志-->
+	<insert id="insertSysLog"  parameterType="com.ustcsoft.system.model.SysLogManageVO">
+		insert into M_SYS_LOG(
+					OPERATOR_ID,
+					OPERATOR_NAME,
+					OPERAT_MENU,
+					OPERAT_TYPE,
+					OPERAT_CONTENT,
+					BROWSER,
+					CREATE_TIME
+		                ) values 
+	        	   (
+				   #{operatorId},
+				   #{operatorName},
+				   #{operateMenu},
+				   #{operateType},
+				   #{operateContent},
+				   #{browser}
+				   <![CDATA[,to_date(#{createTime},'YYYY-MM-DD hh24:mi:ss')]]>
+	              )	
+	</insert>
+		<!-- 功能说明:查询系统日志信息 -->
+	<select id="findLog" resultType="com.ustcsoft.system.model.SysLogManageVO" parameterType="com.ustcsoft.system.model.SysLogManageVO">
+	     SELECT 
+	      	L.OPERATOR_ID AS operatorId,
+	      	L.OPERATOR_NAME AS operatorName,
+			L.CREATE_TIME AS createTime,
+			L.OPERAT_MENU AS operateMenu,
+			L.OPERAT_TYPE AS operateType,
+			L.OPERAT_CONTENT AS operateContent,
+			L.BROWSER AS browser
+	        FROM M_SYS_LOG L  
+		WHERE 1=1
+		<if test="sysLogManage.operatorName!= null and sysLogManage.operatorName!=''">
+				and L.OPERATOR_NAME like '%${sysLogManage.operatorName}%'
+		</if>
+		<if test="sysLogManage.operateType!= null and sysLogManage.operateType!=''">
+				and L.OPERAT_TYPE like '%${sysLogManage.operateType}%'
+		</if>
+		<if test="sysLogManage.operateMenu!=null and sysLogManage.operateMenu!=''">
+				and L.OPERAT_MENU like '%${sysLogManage.operateMenu}%'
+		</if>
+		<if test="sysLogManage.searchDateStart!= null and sysLogManage.searchDateStart!= ''">
+				<![CDATA[ and to_char(L.CREATE_TIME,'YYYY-MM-DD') >= #{sysLogManage.searchDateStart}]]>
+		</if>
+		<if test="sysLogManage.searchDateEnd!= null and sysLogManage.searchDateEnd!=''">
+				<![CDATA[ and to_char(L.CREATE_TIME,'YYYY-MM-DD') <= #{sysLogManage.searchDateEnd}]]>
+		</if>
+		ORDER BY L.CREATE_TIME DESC
+	</select>
+</mapper>

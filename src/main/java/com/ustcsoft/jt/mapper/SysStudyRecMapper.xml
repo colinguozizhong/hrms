@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysStudyRecMapper">
+	<!-- 功能说明:带分页的查询学历信息列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysStudyRecVO" parameterType="com.ustcsoft.system.model.SysStudyRecVO">
+	     SELECT 
+	      	s.id,
+			s.EMP_ID AS empId,
+			s.STUDY_INFO AS studyInfo,
+			ss.STUDY_NAME AS eduRec,
+			s.STUDY_PRO AS studyPro,
+			s.DEGREE AS degree,
+			s.STUDY_SCHOOL AS studySchool,
+			s.STATRT_DATE AS statrtDate,
+			s.FINISH_DATE AS finishDate,
+			s.REMARK AS remark,
+			s.RETERENCE AS reterence,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			o.ORG_NAME AS deptName,
+			ss.STUDY_NAME AS eduName，
+			s.EDU_TYPE
+		FROM T_STUDY_REC s
+		LEFT JOIN T_EMP e
+		ON s.EMP_ID=e.EMP_ID
+		LEFT JOIN M_ORG o
+		ON e.DEPT_NO=o.ORG_ID
+		LEFT JOIN T_STUDY_TYPE ss
+		ON s.EDU_REC=ss.STUDY_CODE
+		WHERE 1=1
+		<if test="study.empId != null and study.empId != ''">
+				and s.EMP_ID = #{study.empId}
+		</if>
+		ORDER BY s.CREATE_DATE DESC
+	</select>
+	
+	<!-- 功能说明:根据人员id来分页查询学历信息 -->
+	<select id="queryByEmpidWithPage" resultType="com.ustcsoft.system.model.SysStudyRecVO" parameterType="com.ustcsoft.system.model.SysStudyRecVO">
+	     SELECT 
+	      	s.id,
+			s.EMP_ID AS empId,
+			s.STUDY_INFO AS studyInfo,
+			s.EDU_REC AS eduRec,
+			s.STUDY_PRO AS studyPro,
+			s.DEGREE AS degree,
+			s.STUDY_SCHOOL AS studySchool,
+			s.STATRT_DATE AS statrtDate,
+			s.FINISH_DATE AS finishDate,
+			s.REMARK AS remark,
+			s.RETERENCE AS reterence,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			o.ORG_NAME AS deptName,
+			ss.STATION_NAME AS stationName
+		FROM T_STUDY_REC s
+		LEFT JOIN T_EMP e
+		ON s.EMP_ID=e.EMP_ID
+		LEFT JOIN M_ORG o
+		ON e.DEPT_NO=o.ORG_ID
+		LEFT JOIN T_STATION ss
+		ON e.STATION_ID=ss.STUDY_CODE
+		WHERE 1=1
+		<if test="study.empId != null and study.empId != ''">
+				and s.EMP_ID = #{study.empId}
+		</if>
+		ORDER BY s.CREATE_DATE DESC
+	</select>
+
+	<!-- 功能说明:根据人员ID查找相关联的学历信息 -->
+	<select id="loadByEmpid" resultType="com.ustcsoft.system.model.SysStudyRecVO" parameterType="java.lang.String">
+	     SELECT 
+	     	id,
+			EMP_ID AS empId,
+			STUDY_INFO AS studyInfo,
+			EDU_REC AS eduRec,
+			STUDY_PRO AS studyPro,
+			DEGREE AS degree,
+			STUDY_SCHOOL AS studySchool,
+			STATRT_DATE AS statrtDate,
+			FINISH_DATE AS finishDate,
+			REMARK AS remark,
+			RETERENCE AS reterence,
+			CREATE_PER AS creater,
+			CREATE_DATE AS createDate
+		FROM T_STUDY_REC
+			WHERE EMP_ID=#{empid}
+		ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<!--  功能说明:添加学历信息-->
+	<insert id="add"  parameterType="com.ustcsoft.system.model.SysStudyRecVO">
+		INSERT INTO T_STUDY_REC(
+			id
+			<if test="empId != null and empId != ''">
+				,EMP_ID
+			</if>
+			<if test="studyInfo != null and studyInfo != ''">
+				,STUDY_INFO
+			</if>
+			<if test="eduRec != null and eduRec != ''">
+				,EDU_REC
+			</if>
+			<if test="studyPro != null and studyPro != ''">
+				,STUDY_PRO
+			</if>
+			<if test="degree != null and degree != ''">
+				,DEGREE
+			</if>
+			<if test="studySchool != null and studySchool != ''">
+				,STUDY_SCHOOL
+			</if>
+			<if test="statrtDate != null and statrtDate != ''">
+				,STATRT_DATE
+			</if>
+			<if test="finishDate != null and finishDate != ''">
+				,FINISH_DATE
+			</if>
+			<if test="remark != null and remark != ''">
+				,REMARK
+			</if>
+			<if test="reterence != null and reterence != ''">
+				,RETERENCE
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+			<if test="eduType != null and eduType != ''">
+				,EDU_TYPE
+			</if>
+		) 
+		VALUES 
+		(
+			#{id}
+			<if test="empId != null and empId != ''">
+				,#{empId}
+			</if>
+			<if test="studyInfo != null and studyInfo != ''">
+				,#{studyInfo}
+			</if>
+			<if test="eduRec != null and eduRec != ''">
+				,#{eduRec}
+			</if>
+			<if test="studyPro != null and studyPro != ''">
+				,#{studyPro}
+			</if>
+			<if test="degree != null and degree != ''">
+				,#{degree}
+			</if>
+			<if test="studySchool != null and studySchool != ''">
+				,#{studySchool}
+			</if>
+			<if test="statrtDate != null and statrtDate != ''">
+				<![CDATA[,to_date(#{statrtDate},'YYYY-MM-DD')]]>
+			</if>
+			<if test="finishDate != null and finishDate != ''">
+				<![CDATA[,to_date(#{finishDate},'YYYY-MM-DD')]]>
+			</if>
+			<if test="remark != null and remark != ''">
+				,#{remark}
+			</if>
+			<if test="reterence != null and reterence != ''">
+				,#{reterence}
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="eduType != null and eduType != ''">
+				,#{eduType}
+			</if>
+			
+		)	
+	</insert>
+	
+	<!--  功能说明:更新学历信息-->
+	<update id="update"  parameterType="com.ustcsoft.system.model.SysStudyRecVO">
+		UPDATE T_STUDY_REC
+			<set>
+				<if test="studyInfo != null">
+					STUDY_INFO=#{studyInfo},
+				</if>
+				<if test="eduRec != null">
+					EDU_REC=#{eduRec},
+				</if>
+				<if test="studyPro != null">
+					STUDY_PRO=#{studyPro},
+				</if>
+				<if test="degree != null">
+					DEGREE=#{degree},
+				</if>
+				<if test="studySchool != null">
+					STUDY_SCHOOL=#{studySchool},
+				</if>
+				<if test="statrtDate != null">
+					<![CDATA[STATRT_DATE=to_date(#{statrtDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="finishDate != null">
+					<![CDATA[FINISH_DATE=to_date(#{finishDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="remark != null">
+					REMARK=#{remark},
+				</if>
+				<if test="reterence != null">
+					RETERENCE=#{reterence},
+				</if>
+			</set>
+		WHERE 
+			EMP_ID=#{empId}
+			<if test="eduType != null and eduType != ''">
+				and EDU_TYPE = #{eduType}
+			</if>
+	</update>
+	<!--  功能说明:更新学历信息-->
+	<update id="updateStudyRec"  parameterType="com.ustcsoft.system.model.SysStudyRecVO">
+		UPDATE T_STUDY_REC
+			<set>
+				<if test="studyInfo != null">
+					STUDY_INFO=#{studyInfo},
+				</if>
+				<if test="eduRec != null">
+					EDU_REC=#{eduRec},
+				</if>
+				<if test="studyPro != null">
+					STUDY_PRO=#{studyPro},
+				</if>
+				<if test="degree != null">
+					DEGREE=#{degree},
+				</if>
+				<if test="studySchool != null">
+					STUDY_SCHOOL=#{studySchool},
+				</if>
+				<if test="statrtDate != null">
+					<![CDATA[STATRT_DATE=to_date(#{statrtDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="finishDate != null">
+					<![CDATA[FINISH_DATE=to_date(#{finishDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="remark != null">
+					REMARK=#{remark},
+				</if>
+				<if test="reterence != null">
+					RETERENCE=#{reterence},
+				</if>
+			</set>
+		WHERE ID=#{id}
+	</update>
+	
+	<!--  功能说明:根据人员id删除学历信息-->
+	<delete id="deleteByEmpids" parameterType="java.util.List">
+		DELETE FROM T_STUDY_REC
+		WHERE EMP_ID IN
+		<foreach collection="list" item="empid"
+            index="index" open="(" close=")" separator=",">
+            #{empid}
+        </foreach>
+	</delete>
+	
+	<!--  功能说明:根据学历信息ID删除相关对应人员的学历信息-->
+	<delete id="deleteByStudyRecIds" parameterType="java.util.List">
+		DELETE FROM T_STUDY_REC
+		WHERE ID IN
+		<foreach collection="list" item="id"
+            index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</delete>
+</mapper>

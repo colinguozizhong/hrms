@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysStationTypeMapper">
+	
+	<!-- 功能说明:分页查询所有岗位类型的列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysStationTypeVO" parameterType="com.ustcsoft.system.model.SysStationTypeVO">
+	    SELECT 
+		  STATION_ID AS id,
+		  STATION_CODE AS stationCode,
+		  STATION_NAME AS stationName,
+		  STATION_GRADE AS stationGrade,
+		  TOTAL_PER AS totalPer,
+		  COMPLEMENT_PER AS complementPer,
+		  CREATE_PER AS creater,
+		  CREATE_DATE AS createDate
+		FROM T_STATION
+		ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<!-- 功能说明:加载一条岗位类型信息 -->
+	<select id="load" resultType="com.ustcsoft.system.model.SysStationTypeVO" parameterType="java.lang.String">
+	    SELECT 
+		  STATION_ID AS id,
+		  STATION_CODE AS stationCode,
+		  STATION_NAME AS stationName,
+		  STATION_GRADE AS stationGrade,
+		  TOTAL_PER AS totalPer,
+		  COMPLEMENT_PER AS complementPer,
+		  CREATE_PER AS creater,
+		  CREATE_DATE AS createDate，
+		  STATION_TYPE as stationType
+		FROM T_STATION
+		WHERE STATION_ID=#{id}
+	</select>
+	
+	<!--  功能说明:添加岗位类型信息-->
+	<insert id="add"  parameterType="com.ustcsoft.system.model.SysStationTypeVO">
+		INSERT INTO T_STATION(
+			STATION_ID
+			<if test="stationCode != null and stationCode != ''">
+				,STATION_CODE
+			</if>
+			<if test="stationName != null and stationName != ''">
+				,STATION_NAME
+			</if>
+			<if test="stationGrade != null and stationGrade != ''">
+				,STATION_GRADE
+			</if>
+				<if test="totalPer != null and totalPer != ''">
+				,TOTAL_PER
+			</if>
+				<if test="complementPer != null and complementPer != ''">
+				,COMPLEMENT_PER
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+				<if test="stationType != null and stationType != ''">
+				,STATION_TYPE
+			</if>
+		) 
+		VALUES 
+		(
+			#{id}
+			<if test="stationCode != null and stationCode != ''">
+				,#{stationCode}
+			</if>
+			<if test="stationName != null and stationName != ''">
+				,#{stationName}
+			</if>
+			<if test="stationGrade != null and stationGrade != ''">
+				,#{stationGrade}
+			</if>
+			<if test="totalPer != null and totalPer != ''">
+				,#{totalPer}
+			</if>
+			<if test="complementPer != null and complementPer != ''">
+				,#{complementPer}
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="stationType != null and stationType != ''">
+				,#{stationType}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:更新岗位类型信息-->
+	<insert id="update"  parameterType="com.ustcsoft.system.model.SysStationTypeVO">
+		UPDATE T_STATION
+		<set>
+			<if test="stationCode != null and stationCode != ''">
+				STATION_CODE=#{stationCode},
+			</if>
+			<if test="stationName != null and stationName != ''">
+				STATION_NAME=#{stationName},
+			</if>
+			<if test="stationGrade != null and stationGrade != ''">
+				STATION_GRADE=#{stationGrade},
+			</if>
+			<if test="totalPer != null and totalPer != ''">
+				TOTAL_PER=#{totalPer},
+			</if>
+			<if test="complementPer != null and complementPer != ''">
+				COMPLEMENT_PER=#{complementPer},
+			</if>
+			<if test="stationType != null and stationType != ''">
+				STATION_TYPE=#{stationType},
+			</if>
+		</set>
+		WHERE STATION_ID=#{id}
+	</insert>
+	
+	<!--  功能说明:根据id删除岗位类型信息-->
+	<delete id="deletes" parameterType="java.util.List">
+		DELETE FROM T_STATION
+		WHERE STATION_ID IN
+		<foreach collection="list" item="id"
+            index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</delete>
+</mapper>

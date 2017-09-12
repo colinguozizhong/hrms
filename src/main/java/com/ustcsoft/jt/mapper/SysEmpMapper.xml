@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysEmpMapper">
+	
+	<!-- 功能说明:带分页的查询人员基本信息列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SystemEmpVO" parameterType="com.ustcsoft.system.model.SystemEmpVO">
+	     SELECT 
+	      	e.EMP_ID AS id,
+			e.DEPT_NO AS deptNO,
+			o1.ORG_NAME AS deptName,
+			o2.ORG_NAME AS unitName,
+			e.EMP_NAME AS name,
+			e.EMP_SEX AS sex,
+			e.EMP_CARDID AS cardid,
+			e.EMP_DATE AS birthday,
+			e.EMP_RENAME AS useName,
+			e.EMP_NATION AS nation,
+			e.EMP_P_STATUS AS pStatus,
+			e.EMP_ADDR AS address,
+			e.EMP_PHONE AS phone,
+			e.EMP_EMAIL AS email,
+			e.EMP_PHOTO AS photo,
+			e.STATION_ID AS stationId,
+			e.STATION_GRADE AS stationGrade,
+			e.EMP_JOB AS job,
+			e.EMP_POSITION AS position,
+			e.ENTRY_INFO AS entryInfo,
+			e.ENTRY_DATE AS entryDate,
+			e.EMP_SUTUS AS status,
+			e.EMP_ORGNIZATION AS orgnization,
+			e.EDU_REC AS eduRec,
+			e.REMARK AS remark,
+			e.CREATE_PER AS creater,
+			e.CREATE_DATE AS createDate,
+			e.IDENTITY_INFO AS identityInfo,
+			e.ENTRY_PARTY_DATE AS entryPartyDate,
+			e.WORK_DATE AS workDate,
+			s.STUDY_NAME AS eduRecName,
+			p.POSITION_NAME AS positionName,
+			st.STATION_NAME AS stationName,
+			e.NATIVE_PLACE ,
+			e.BIRTH_PLACE,
+			e.JOB_RANK,
+			e.EDU_FIRST_REC
+		FROM T_EMP e
+		LEFT JOIN M_ORG o1
+		ON e.DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON e.UNIT_NO=o2.ORG_ID
+		LEFT JOIN T_STUDY_TYPE s
+		ON e.EDU_REC=s.STUDY_ID   
+		LEFT JOIN T_POSITION_CODE p
+		ON e.EMP_POSITION=p.POSITION_ID
+		LEFT JOIN T_STATION st
+		ON e.STATION_ID=st.STATION_CODE
+			WHERE o2.BUSINESS_ID like '%${emp.deptNO}%'
+		<if test="emp.status != null and emp.status != ''">
+				and EMP_SUTUS = #{emp.status}
+		</if>
+		<if test="emp.name != null and emp.name != ''">
+				and EMP_NAME like '%${emp.name}%'
+		</if>
+		<if test="emp.job != null and emp.job != ''">
+				and EMP_JOB like '%${emp.job}%'
+		</if>
+		<if test="emp.entryDateStart != null and emp.entryDateStart != ''">
+				<![CDATA[ and to_char(ENTRY_DATE,'YYYY-MM-DD') >= #{emp.entryDateStart}]]>
+		</if>
+		<if test="emp.entryDateEnd != null and emp.entryDateEnd != ''">
+				<![CDATA[and to_char(ENTRY_DATE,'YYYY-MM-DD') <= #{emp.entryDateEnd}]]>
+		</if>
+		ORDER BY e.CREATE_DATE DESC
+	</select>
+			
+	<!-- 功能说明:根据id查找人员职称和岗位-->
+	<select id="loadPosAndSta" resultType="com.ustcsoft.system.model.PositionApplyVO" parameterType="java.lang.String">
+	     SELECT 
+	      	s.STATION_NAME AS oldStationName,
+	      	p.POSITION_NAME AS oldPositionName,
+	      	e.EMP_JOB  AS oldJob,
+	      	e.STATION_CODE AS oldStationId,
+	      	e.EMP_POSITION AS oldPositionId
+		FROM T_EMP e
+		LEFT JOIN T_STATION s
+		ON e.STATION_ID=s.STATION_CODE
+		LEFT JOIN T_POSITION_CODE p
+		ON e.EMP_POSITION=p.POSITION_ID
+			WHERE EMP_ID=#{id}
+	</select>
+	
+	<!-- 功能说明:根据id查找人员基本信息 -->
+	<select id="load" resultType="com.ustcsoft.system.model.SystemEmpVO" parameterType="java.lang.String">
+	     SELECT 
+	      	e.EMP_ID AS id,
+			e.DEPT_NO AS deptNO,
+			e.UNIT_NO AS unitNO,
+			e.EMP_NAME AS name,
+			e.EMP_SEX AS sex,
+			e.EMP_CARDID AS cardid,
+			e.EMP_DATE AS birthday,
+			e.EMP_RENAME AS useName,
+			e.EMP_NATION AS nation,
+			e.EMP_P_STATUS AS pStatus,
+			e.EMP_ADDR AS address,
+			e.EMP_PHONE AS phone,
+			e.EMP_EMAIL AS email,
+			e.EMP_PHOTO AS photo,
+			e.STATION_ID AS stationId,
+			s.STATION_NAME AS stationName,
+			e.STATION_GRADE AS stationGrade,
+			e.EMP_JOB AS job,
+			e.EMP_POSITION AS position,
+			e.ENTRY_INFO AS entryInfo,
+			e.ENTRY_DATE AS entryDate,
+			e.EMP_SUTUS AS status,
+			e.EMP_ORGNIZATION AS orgnization,
+			e.EDU_REC AS eduRec,
+			e.REMARK AS remark,
+			e.CREATE_PER AS creater,
+			e.CREATE_DATE AS createDate,
+			e.IDENTITY_INFO AS identityInfo,
+			e.ENTRY_PARTY_DATE AS entryPartyDate,
+			e.WORK_DATE AS workDate,
+			o1.ORG_NAME AS deptName,
+			o2.ORG_NAME AS unitName,
+			p.POSITION_NAME AS positionName,
+			e.NATIVE_PLACE ,
+			e.BIRTH_PLACE,
+			e.JOB_RANK,
+			e.EDU_FIRST_REC
+		FROM T_EMP e
+		LEFT JOIN T_STATION s
+		ON e.STATION_ID=s.STATION_CODE
+		LEFT JOIN M_ORG o1
+		ON e.DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON e.UNIT_NO=o2.ORG_ID
+		LEFT JOIN T_POSITION_CODE p
+		ON e.EMP_POSITION=p.POSITION_ID
+			WHERE EMP_ID=#{id}
+	</select>
+	<select id="findEmpByCardId" resultType="com.ustcsoft.system.model.SystemEmpVO" parameterType="java.lang.String">
+		select 
+			EMP_ID AS id,
+			DEPT_NO AS deptNO,
+			UNIT_NO AS unitNO,
+			EMP_NAME AS name,
+			EMP_SEX AS sex,
+			EMP_CARDID AS cardid
+		from T_EMP where EMP_CARDID = #{cardid}
+	</select>
+		<!--  功能说明:根据人员id删除学历信息 -->
+	<delete id="deleteEmpById" parameterType="java.lang.String">
+		DELETE FROM T_EMP
+		WHERE EMP_ID = #{id}
+	</delete>
+	
+	<!--  功能说明:根据组织名称查询组织Id -->
+	<select id="findOrgIdByOrgName" parameterType="java.lang.String" resultType="java.lang.String" >
+		select ORG_ID from  M_ORG where  ORG_NAME = #{unitName}
+	</select>
+	<!--  功能说明:添加人员基本信息-->
+	<insert id="add"  parameterType="com.ustcsoft.system.model.SystemEmpVO">
+		INSERT INTO T_EMP(
+			EMP_ID
+			<if test="deptNO != null and deptNO != ''">
+				,DEPT_NO
+			</if>
+			<if test="unitNO != null and unitNO != ''">
+				,UNIT_NO
+			</if>
+			<if test="name != null and name != ''">
+				,EMP_NAME
+			</if>
+			<if test="sex != null and sex != ''">
+				,EMP_SEX
+			</if>
+			<if test="cardid != null and cardid != ''">
+				,EMP_CARDID
+			</if>
+			<if test="birthday != null and birthday != ''">
+				,EMP_DATE
+			</if>
+			<if test="useName != null and useName != ''">
+				,EMP_RENAME
+			</if>
+			<if test="nation != null and nation != ''">
+				,EMP_NATION
+			</if>
+			<if test="pStatus != null and pStatus != ''">
+				,EMP_P_STATUS
+			</if>
+			<if test="address != null and address != ''">
+				,EMP_ADDR
+			</if>
+			<if test="phone != null and phone != ''">
+				,EMP_PHONE
+			</if>
+			<if test="email != null and email != ''">
+				,EMP_EMAIL
+			</if>
+			<if test="photo != null and photo != ''">
+				,EMP_PHOTO
+			</if>
+			<if test="stationId != null and stationId != ''">
+				,STATION_ID
+			</if>
+			<if test="stationGrade != null and stationGrade != ''">
+				,STATION_GRADE
+			</if>
+			<if test="job != null and job != ''">
+				,EMP_JOB
+			</if>
+			<if test="position != null and position != ''">
+				,EMP_POSITION
+			</if>
+			<if test="entryInfo != null and entryInfo != ''">
+				,ENTRY_INFO
+			</if>
+			<if test="entryDate != null and entryDate != ''">
+				,ENTRY_DATE
+			</if>
+			<if test="status != null and status != ''">
+				,EMP_SUTUS
+			</if>
+			<if test="orgnization != null and orgnization != ''">
+				,EMP_ORGNIZATION
+			</if>
+			<if test="eduRec != null and eduRec != ''">
+				,EDU_REC
+			</if>
+			<if test="remark != null and remark != ''">
+				,REMARK
+			</if>
+			<if test="identityInfo != null and identityInfo != ''">
+				,IDENTITY_INFO
+			</if>
+			<if test="entryPartyDate != null and entryPartyDate != ''">
+				,ENTRY_PARTY_DATE
+			</if>
+			<if test="workDate != null and workDate != ''">
+				,WORK_DATE
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+				<if test="birthPlace != null and birthPlace != ''">
+				,BIRTH_PLACE
+			</if>
+			<if test="jobRank != null and jobRank != ''">
+				,JOB_RANK
+			</if>
+			<if test="eduFirstRec != null and eduFirstRec != ''">
+				,EDU_FIRST_REC
+			</if>
+			<if test="nativePlace != null and nativePlace != ''">
+				,NATIVE_PLACE
+			</if>
+		) 
+		VALUES 
+		(
+			#{id}
+			<if test="deptNO != null and deptNO != ''">
+				,#{deptNO}
+			</if>
+			<if test="unitNO != null and unitNO != ''">
+				,#{unitNO}
+			</if>
+			<if test="name != null and name != ''">
+				,#{name}
+			</if>
+			<if test="sex != null and sex != ''">
+				,#{sex}
+			</if>
+			<if test="cardid != null and cardid != ''">
+				,#{cardid}
+			</if>
+			<if test="birthday != null and birthday != ''">
+				<![CDATA[,to_date(#{birthday},'YYYY-MM-DD')]]>
+			</if>
+			<if test="useName != null and useName != ''">
+				,#{useName}
+			</if>
+			<if test="nation != null and nation != ''">
+				,#{nation}
+			</if>
+			<if test="pStatus != null and pStatus != ''">
+				,#{pStatus}
+			</if>
+			<if test="address != null and address != ''">
+				,#{address}
+			</if>
+			<if test="phone != null and phone != ''">
+				,#{phone}
+			</if>
+			<if test="email != null and email != ''">
+				,#{email}
+			</if>
+			<if test="photo != null and photo != ''">
+				,#{photo}
+			</if>
+			<if test="stationId != null and stationId != ''">
+				,#{stationId}
+			</if>
+			<if test="stationGrade != null and stationGrade != ''">
+				,#{stationGrade}
+			</if>
+			<if test="job != null and job != ''">
+				,#{job}
+			</if>
+			<if test="position != null and position != ''">
+				,#{position}
+			</if>
+			<if test="entryInfo != null and entryInfo != ''">
+				,#{entryInfo}
+			</if>
+			<if test="entryDate != null and entryDate != ''">
+				<![CDATA[,to_date(#{entryDate},'YYYY-MM-DD')]]>
+			</if>
+			<if test="status != null and status != ''">
+				,#{status}
+			</if>
+			<if test="orgnization != null and orgnization != ''">
+				,#{orgnization}
+			</if>
+			<if test="eduRec != null and eduRec != ''">
+				,#{eduRec}
+			</if>
+			<if test="remark != null and remark != ''">
+				,#{remark}
+			</if>
+			<if test="identityInfo != null and identityInfo != ''">
+				,#{identityInfo}
+			</if>
+			<if test="entryPartyDate != null and entryPartyDate != ''">
+				<![CDATA[,to_date(#{entryPartyDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="workDate != null and workDate != ''">
+				<![CDATA[,to_date(#{workDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="birthPlace != null and birthPlace != ''">
+				,#{birthPlace}
+			</if>
+				<if test="jobRank != null and jobRank != ''">
+				,#{jobRank}
+			</if>
+				<if test="eduFirstRec != null and eduFirstRec != ''">
+				,#{eduFirstRec}
+			</if>
+				<if test="nativePlace != null and nativePlace != ''">
+				,#{nativePlace}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:更新人员基本信息-->
+	<update id="update"  parameterType="com.ustcsoft.system.model.SystemEmpVO">
+		UPDATE T_EMP
+			set
+					DEPT_NO=#{deptNO},
+					UNIT_NO=#{unitNO},
+					EMP_NAME=#{name},
+					EMP_SEX=#{sex},
+					EMP_CARDID=#{cardid},
+				<if test="birthday != null and birthday != ''">
+					<![CDATA[EMP_DATE=to_date(#{birthday},'YYYY-MM-DD'),]]>
+				</if>
+					EMP_RENAME=#{useName},
+					EMP_NATION=#{nation},
+					EMP_P_STATUS=#{pStatus},
+					EMP_ADDR=#{address},
+					EMP_PHONE=#{phone},
+					EMP_EMAIL=#{email},
+					EMP_PHOTO=#{photo},
+				<if test="stationId != null and stationId != ''">	
+					STATION_ID=#{stationId},
+				</if>
+					STATION_GRADE=#{stationGrade},
+					EMP_JOB=#{job},
+				<if test="position != null and position != ''">	
+					EMP_POSITION=#{position},
+				</if>
+					ENTRY_INFO=#{entryInfo},
+				<if test="entryDate != null and entryDate != ''">
+					<![CDATA[ENTRY_DATE=to_date(#{entryDate},'YYYY-MM-DD'),]]>
+				</if>
+					EMP_SUTUS=#{status},
+					EMP_ORGNIZATION=#{orgnization},
+					EDU_REC=#{eduRec},
+					REMARK=#{remark},
+					IDENTITY_INFO=#{identityInfo},
+				<if test="entryPartyDate != null and entryPartyDate != ''">
+					<![CDATA[ENTRY_PARTY_DATE=to_date(#{entryPartyDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="workDate != null and workDate != ''">
+					<![CDATA[WORK_DATE=to_date(#{workDate},'YYYY-MM-DD'),]]>
+				</if>
+					CREATE_PER=#{creater},
+					NATIVE_PLACE=#{nativePlace},
+					BIRTH_PLACE=#{birthPlace},
+					JOB_RANK=#{jobRank},
+					EDU_FIRST_REC=#{eduFirstRec}
+		WHERE EMP_ID=#{id}
+	</update>
+	
+	<!--  功能说明:根据人员id删除学历信息-->
+	<delete id="deletes" parameterType="java.util.List">
+		DELETE FROM T_EMP
+		WHERE EMP_ID IN
+		<foreach collection="list" item="empid"
+            index="index" open="(" close=")" separator=",">
+            #{empid}
+        </foreach>
+	</delete>
+	
+	<!-- 功能说明:带分页的查询人员附件列表 -->
+	<select id="queryEmpFilePage" resultType="com.ustcsoft.system.model.EmpFileVO" parameterType="com.ustcsoft.system.model.EmpFileVO">
+	     SELECT 
+	      	f.FILE_ID AS fileId,
+			f.EMP_ID AS empId,
+			f.SAVE_PATH AS savePath,
+			f.FILE_NAME AS fileName,
+			f.REMARK AS remark,
+			f.FILE_FORMAT AS fileFormat,
+			f.UPLOAD_PER AS uploadPer,
+			f.UPLOAD_TIME AS uploadTime
+		FROM T_EMP_FILE f
+			WHERE f.EMP_ID = #{empFile.empId}
+	    <if test="empFile.fileName != null and empFile.fileName != ''">
+				and f.FILE_NAME  like '%${empFile.fileName}%'
+		</if>
+		<if test="empFile.searchDateStart != null and empFile.searchDateStart != ''">
+				<![CDATA[ and to_char(UPLOAD_TIME,'YYYY-MM-DD') >= #{empFile.searchDateStart}]]>
+		</if>
+		<if test="empFile.searchDateEnd != null and empFile.searchDateEnd != ''">
+				<![CDATA[and to_char(UPLOAD_TIME,'YYYY-MM-DD') <= #{empFile.searchDateEnd}]]>
+		</if>
+		ORDER BY f.UPLOAD_TIME DESC
+	</select>
+	
+		<!--  功能说明:新增干部任命申请单-->
+	<insert id="insertEmpFile"  parameterType="com.ustcsoft.system.model.EmpFileVO">
+		insert into T_EMP_FILE(
+					FILE_ID,
+					EMP_ID,
+					SAVE_PATH,
+					FILE_NAME,
+					FILE_FORMAT,
+					UPLOAD_PER,
+					REMARK,
+					UPLOAD_TIME
+		                ) values 
+	        	   (
+				   #{fileId},
+				   #{empId},
+				   #{savePath},
+				   #{fileName},
+				   #{fileFormat},
+				   #{uploadPer},
+				   #{remark}
+				   <![CDATA[,to_date(#{uploadTime},'YYYY-MM-DD hh24:mi:ss')]]>
+	              )	
+	</insert>
+	
+	<!--  功能说明:根据id删除人员附件-->
+	<delete id="deleteFile" parameterType="java.lang.String">
+		DELETE FROM T_EMP_FILE
+		WHERE FILE_ID =#{fileId}
+	</delete>
+	
+	
+	<!-- 功能说明:根据附件Id查询附件信息 -->
+	<select id="getEmpFileByFileId" resultType="com.ustcsoft.system.model.EmpFileVO" parameterType="java.lang.String">
+	     SELECT 
+	      	f.FILE_ID AS fileId,
+			f.EMP_ID AS empId,
+			f.SAVE_PATH AS savePath,
+			f.FILE_NAME AS fileName,
+			f.FILE_FORMAT AS fileFormat,
+			f.UPLOAD_PER AS uploadPer,
+			f.UPLOAD_TIME AS uploadTime,
+			f.REMARK AS remark
+		FROM T_EMP_FILE f
+		WHERE f.FILE_ID =#{fileId}
+	</select>
+	
+	<!-- 功能说明:查询非在职人员的额外信息 -->
+	<select id="getEmpExtraInfo" resultType="com.ustcsoft.system.model.SysChangeRecVO" parameterType="com.ustcsoft.system.model.SysChangeRecVO">
+	    SELECT 
+		    INFO1 as info1,  
+	        INFO2 as info2,
+	        INFO3 as info4,  
+	        INFO4 as info5,
+	        INFO5 as info5,  
+	        INFO6 as info6
+		FROM   T_CHANGE_DETAIL D   LEFT JOIN  T_CHANGE_HEAD H ON D.VOUCHER_NO = H.VOUCHER_NO
+		WHERE  H.STATUS = '2' AND D.EMP_ID =#{empId}   and ROWNUM = 1
+		ORDER BY H.CREATE_DATE DESC
+	</select>
+	
+		<!-- 功能说明:查询人员基本信息列表 -->
+	<select id="queryWithList" resultType="com.ustcsoft.system.model.SystemEmpVO" parameterType="com.ustcsoft.system.model.SystemEmpVO">
+	     SELECT 
+	      	e.EMP_ID AS id,
+			e.DEPT_NO AS deptNO,
+			o1.ORG_NAME AS deptName,
+			o2.ORG_NAME AS unitName,
+			e.EMP_NAME AS name,
+			e.EMP_SEX AS sex,
+			e.EMP_CARDID AS cardid,
+			e.EMP_DATE AS birthday,
+			e.EMP_RENAME AS useName,
+			e.EMP_NATION AS nation,
+			e.EMP_P_STATUS AS pStatus,
+			e.EMP_ADDR AS address,
+			e.EMP_PHONE AS phone,
+			e.EMP_EMAIL AS email,
+			e.EMP_PHOTO AS photo,
+			e.STATION_ID AS stationId,
+			e.STATION_GRADE AS stationGrade,
+			e.EMP_JOB AS job,
+			e.EMP_POSITION AS position,
+			e.ENTRY_INFO AS entryInfo,
+			e.ENTRY_DATE AS entryDate,
+			e.EMP_SUTUS AS status,
+			e.EMP_ORGNIZATION AS orgnization,
+			e.EDU_REC AS eduRec,
+			e.REMARK AS remark,
+			e.CREATE_PER AS creater,
+			e.CREATE_DATE AS createDate,
+			e.IDENTITY_INFO AS identityInfo,
+			e.ENTRY_PARTY_DATE AS entryPartyDate,
+			e.WORK_DATE AS workDate,
+			s.STUDY_NAME AS eduRecName,
+			p.POSITION_NAME AS positionName,
+			st.STATION_NAME AS stationName,
+			e.NATIVE_PLACE ,
+			e.BIRTH_PLACE,
+			e.JOB_RANK,
+			e.EDU_FIRST_REC
+		FROM T_EMP e
+		LEFT JOIN M_ORG o1
+		ON e.DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON e.UNIT_NO=o2.ORG_ID
+		LEFT JOIN T_STUDY_TYPE s
+		ON e.EDU_REC=s.STUDY_ID   
+		LEFT JOIN T_POSITION_CODE p
+		ON e.EMP_POSITION=p.POSITION_ID
+		LEFT JOIN T_STATION st
+		ON e.STATION_ID=st.STATION_CODE
+			WHERE o2.BUSINESS_ID like '%${emp.deptNO}%'
+		<if test="emp.status != null and emp.status != ''">
+				and EMP_SUTUS = #{emp.status}
+		</if>
+		<if test="emp.name != null and emp.name != ''">
+				and EMP_NAME like '%${emp.name}%'
+		</if>
+		<if test="emp.job != null and emp.job != ''">
+				and EMP_JOB like '%${emp.job}%'
+		</if>
+		<if test="emp.entryDateStart != null and emp.entryDateStart != ''">
+				<![CDATA[ and to_char(ENTRY_DATE,'YYYY-MM-DD') >= #{emp.entryDateStart}]]>
+		</if>
+		<if test="emp.entryDateEnd != null and emp.entryDateEnd != ''">
+				<![CDATA[and to_char(ENTRY_DATE,'YYYY-MM-DD') <= #{emp.entryDateEnd}]]>
+		</if>
+		ORDER BY e.CREATE_DATE DESC
+	</select>
+	
+</mapper>

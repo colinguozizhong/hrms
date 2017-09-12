@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.PositionTrainRecordMapper">
+	 <!-- 功能说明:带分页的查询职称培训记录信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.PositionTrainRecordVO" parameterType="com.ustcsoft.system.model.PositionTrainRecordVO">
+	     SELECT 
+	      	R.POSITION_TRAIN_ID AS positionTrainId,
+	      	R.EMP_ID AS empId,
+			R.TRAIN_DATE AS trainDate,
+			R.TRAIN_CONTENT AS trainContent,
+			R.TRAIN_DEPT AS trainDept,
+			R.TRAIN_TIME AS trainTime,
+			R.TRAIN_INFO AS trainInfo,
+			R.TRAIN_SCORE AS trainScore,
+			R.TRAIN_RESULT AS trainResult,
+			R.CREATE_PER AS createPer,
+			R.CREATE_DATE AS createDate,
+			E.EMP_NAME AS empName,
+			O.ORG_NAME AS dept
+		FROM T_POSITION_REC R LEFT JOIN T_EMP E ON R.EMP_ID = E.EMP_ID
+		                      LEFT JOIN M_ORG O ON E.DEPT_NO = O.ORG_ID
+		WHERE O.BUSINESS_ID like '%${positionTrainRecord.dept}%' 
+		<if test="positionTrainRecord.empName!= null and positionTrainRecord.empName!=''">
+				and E.EMP_NAME like '%${positionTrainRecord.empName}%'
+		</if>
+		<if test="positionTrainRecord.trainDateStart!= null and positionTrainRecord.trainDateStart!= ''">
+				<![CDATA[ and to_char(TRAIN_DATE,'YYYY-MM-DD') >= #{positionTrainRecord.trainDateStart}]]>
+		</if>
+		<if test="positionTrainRecord.trainDateEnd!= null and positionTrainRecord.trainDateEnd!=''">
+				<![CDATA[ and to_char(TRAIN_DATE,'YYYY-MM-DD') <= #{positionTrainRecord.trainDateEnd}]]>
+		</if>
+		<if test="positionTrainRecord.empId!= null and positionTrainRecord.empId!=''">
+				and R.EMP_ID = #{positionTrainRecord.empId}
+		</if>
+		ORDER BY R.CREATE_DATE DESC
+	</select>
+	
+		<!--  功能说明:新增职称培训记录-->
+	<insert id="insertPositionTrainRecord"  parameterType="com.ustcsoft.system.model.PositionTrainRecordVO">
+		insert into T_POSITION_REC(
+					POSITION_TRAIN_ID,
+					EMP_ID,
+					TRAIN_DATE,
+					TRAIN_CONTENT,
+					TRAIN_DEPT,
+					TRAIN_TIME,
+					TRAIN_INFO,
+					TRAIN_SCORE,
+					TRAIN_RESULT,
+					CREATE_PER,
+					CREATE_DATE
+		                ) values 
+	        	   (
+				   #{positionTrainId},
+				   #{empId}
+				   <![CDATA[,to_date(#{trainDate},'YYYY-MM-DD hh24:mi:ss')]]>,
+				   #{trainContent},
+				   #{trainDept},
+				   #{trainTime},
+				   #{trainInfo},
+				   #{trainScore},
+				   #{trainResult},
+				   #{createPer}
+				   <![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+	              )	
+	</insert>
+	
+	<!--  功能说明:更新职称培训记录-->
+	<update id="updatePositionTrainRecord"  parameterType="com.ustcsoft.system.model.PositionTrainRecordVO">
+		UPDATE T_POSITION_REC
+			<set>
+				<if test="empId != null">
+					EMP_ID=#{empId},
+				</if>
+				<if test="trainDate != null">
+				<![CDATA[TRAIN_DATE=to_date(#{trainDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="trainContent != null">
+					TRAIN_CONTENT=#{trainContent},
+				</if>
+				<if test="trainDept != null">
+					TRAIN_DEPT=#{trainDept},
+				</if>
+				<if test="trainTime != null">
+					TRAIN_TIME=#{trainTime},
+				</if>
+				<if test="trainInfo != null">
+					TRAIN_INFO=#{trainInfo},
+				</if>
+				<if test="trainScore != null">
+					TRAIN_SCORE=#{trainScore},
+				</if>
+				<if test="trainResult != null">
+					TRAIN_RESULT=#{trainResult},
+				</if>
+			</set>
+		WHERE POSITION_TRAIN_ID=#{positionTrainId}
+	</update>
+	
+	<!--  功能说明:根据id删除职称培训记录-->
+	<delete id="deletePositionTrainRecord" parameterType="java.util.List">
+		DELETE FROM T_POSITION_REC
+		WHERE POSITION_TRAIN_ID IN
+		<foreach collection="list" item="positionTrainId"
+            index="index" open="(" close=")" separator=",">
+            #{positionTrainId}
+        </foreach>
+	</delete>
+</mapper>

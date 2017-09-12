@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ustcsoft.jt.mapper.InServiceEmpChartMapper">
+	<select id="searchSexInfo" parameterType="com.ustcsoft.system.model.InServiceEmpChartVO" resultType="com.ustcsoft.system.model.InServiceEmpChartVO">
+		    select 
+				count(case when EMP_SEX='M' then 1 end)as sexMaleCount,
+				count(case when EMP_SEX='F' then 1 end)as sexFemaleCount
+				from T_EMP E LEFT JOIN M_ORG M ON E.UNIT_NO = M.ORG_ID
+				where E.EMP_SEX is not null and E.EMP_SUTUS = '0' and M.BUSINESS_ID like '${businessId}%'
+	</select>
+	
+	<select id="searchEduInfo" parameterType="com.ustcsoft.system.model.InServiceEmpChartVO" resultType="com.ustcsoft.system.model.InServiceEmpChartVO">
+		    select 
+				count (case when S.STUDY_NAME IN('小学','初中') THEN 1  end)  AS edu1,
+				count (case when S.STUDY_NAME IN('高中','中专') THEN 1  end)  AS edu2,
+				count (case when S.STUDY_NAME IN('大专') THEN 1  end)  AS edu3,
+				count (case when S.STUDY_NAME IN('本科','硕士','博士','博士后') THEN 1  end)  AS edu4       
+				from T_EMP E  LEFT JOIN T_STUDY_TYPE  S ON S.STUDY_ID = E.EDU_REC 
+				LEFT JOIN M_ORG M ON E.UNIT_NO = M.ORG_ID
+				where  E.EMP_SUTUS = '0' and M.BUSINESS_ID like '${businessId}%'
+	</select>
+	
+	<select id="searchGLInfo" parameterType="com.ustcsoft.system.model.InServiceEmpChartVO" resultType="com.ustcsoft.system.model.InServiceEmpChartVO">
+		    <![CDATA[select 
+		        COUNT(1)   AS glTotal,
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE))>=0 and  months_between(sysdate,to_date(E.WORK_DATE)) <=3  THEN '1'  END ) AS gl1, 
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE))> 3 and  months_between(sysdate,to_date(E.WORK_DATE)) <=6  THEN '1'  END ) AS gl2, 
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE))> 6 and  months_between(sysdate,to_date(E.WORK_DATE)) <=12 THEN '1'  END ) AS gl3, 
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE))> 12 and months_between(sysdate,to_date(E.WORK_DATE)) <=24  THEN '1' END ) AS gl4, 
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE))> 24 and months_between(sysdate,to_date(E.WORK_DATE)) <=36  THEN '1' END ) AS gl5,
+		        COUNT(CASE when months_between(sysdate,to_date(E.WORK_DATE)) > 36 THEN '1' END ) AS gl6 ]]>			
+		        FROM　T_EMP E LEFT JOIN M_ORG M ON E.UNIT_NO = M.ORG_ID 
+		        WHERE E.EMP_SUTUS = '0' and M.BUSINESS_ID like '${chart.businessId}%' AND E.WORK_DATE  IS NOT NULL
+	</select>
+	
+		<select id="searchAgeInfo" parameterType="com.ustcsoft.system.model.InServiceEmpChartVO" resultType="com.ustcsoft.system.model.InServiceEmpChartVO">
+	
+	  		<![CDATA[select 
+	  		
+                COUNT(1) AS ageTotal,
+               	AVG (months_between(sysdate,to_date(E.EMP_DATE))/12) AS ageAverage,
+		        COUNT(CASE when floor(months_between(sysdate,to_date(E.EMP_DATE))/12)>=0 and   floor(months_between(sysdate,to_date(E.EMP_DATE))/12) <20  THEN '1'  END ) AS age1, 
+		        COUNT(CASE when floor(months_between(sysdate,to_date(E.EMP_DATE))/12)>=20 and  floor(months_between(sysdate,to_date(E.EMP_DATE))/12) <30  THEN '1'  END ) AS age2, 
+		        COUNT(CASE when floor(months_between(sysdate,to_date(E.EMP_DATE))/12)>=30 and  floor(months_between(sysdate,to_date(E.EMP_DATE))/12) <40  THEN '1'  END ) AS age3, 
+		        COUNT(CASE when floor(months_between(sysdate,to_date(E.EMP_DATE))/12)>=40 and  floor(months_between(sysdate,to_date(E.EMP_DATE))/12) <50  THEN '1'  END ) AS age4, 
+		        COUNT(CASE when floor(months_between(sysdate,to_date(E.EMP_DATE))/12)>=50   THEN '1'  END ) AS age5]]>
+		        FROM　T_EMP E LEFT JOIN M_ORG M ON E.UNIT_NO = M.ORG_ID 
+		        WHERE E.EMP_SUTUS = '0' and M.BUSINESS_ID like '${businessId}%' AND E.EMP_DATE  IS NOT NULL
+       	</select>
+       	
+	<select id="searchStationInfo" parameterType="com.ustcsoft.system.model.InServiceEmpChartVO" resultType="com.ustcsoft.system.model.InServiceEmpChartVO">
+				
+			 select                
+                COUNT(1)   AS stationCount,
+				count (case when S.STATION_TYPE IN('工勤类') THEN 1  end)  AS stationPuGongCount,
+				count (case when S.STATION_TYPE IN('文职类') THEN 1  end)  AS stationWenZhiCount,
+				count (case when S.STATION_TYPE IN('专业技术类') THEN 1  end)  AS stationJiShuCount,
+				count (case when S.STATION_TYPE IN('管理类') THEN 1  end)  AS stationGuanLiCount,
+				count (case when S.STATION_TYPE IN('其他类') THEN 1  end)  AS stationQiTaCount       
+     
+				from T_EMP E  LEFT JOIN T_STATION  S ON S.STATION_ID = E.STATION_ID 
+				LEFT JOIN M_ORG M ON E.UNIT_NO = M.ORG_ID
+				where  E.EMP_SUTUS = '0' and M.BUSINESS_ID like '${businessId}%' and E.STATION_ID IS NOT NULL
+	</select>
+</mapper>

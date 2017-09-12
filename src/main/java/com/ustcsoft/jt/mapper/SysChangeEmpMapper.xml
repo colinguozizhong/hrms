@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ustcsoft.jt.mapper.SysChangeEmpMapper">
+	<select id="findChangeEmpInfo" parameterType="hashMap" resultType="hashmap">
+		SELECT
+			og.ORG_ID AS org_id
+			,og.ORG_NAME AS org_name
+			,c.TYPE_ID AS type_id
+		FROM
+			(SELECT
+				o.ORG_ID AS org_id
+				,o.ORG_NAME AS org_name
+			FROM M_ORG o
+	    	WHERE o.BUSINESS_ID LIKE '%${map.businessId}%') og
+		LEFT JOIN
+			T_CHANGE_DETAIL c
+    	ON og.ORG_ID=c.DEPT_NO
+			<if test="map.changeStartDateStr!=null and map.changeStartDateStr!=''">
+				<![CDATA[ and to_char(c.CHANGE_DATE,'YYYY-MM-DD') >= #{map.changeStartDateStr}]]>
+			</if>
+			<if test="map.changeEndDateStr!=null and map.changeEndDateStr!=''">
+				<![CDATA[ and to_char(c.CHANGE_DATE,'YYYY-MM-DD') <= #{map.changeEndDateStr}]]>
+			</if>
+	</select>
+		
+	<select id="findNumOfBianZhi" parameterType="hashMap" resultType="hashmap">
+		SELECT
+			og.ORG_ID AS org_id
+			,e.EMP_ORGNIZATION
+		FROM
+			(SELECT
+				o.ORG_ID AS org_id
+			FROM M_ORG o
+	    	WHERE o.BUSINESS_ID LIKE '%${map.businessId}%') og
+		LEFT JOIN
+			T_EMP e
+    	ON og.ORG_ID=e.DEPT_NO AND (e.EMP_ORGNIZATION='0' OR e.EMP_ORGNIZATION='1')
+	</select>
+	
+	<select id="glFXList" parameterType="com.ustcsoft.system.model.LeaveEmpCharVO" 
+	resultType="com.ustcsoft.system.model.LeaveEmpCharVO">
+		<![CDATA[SELECT 
+			COUNT(1)   AS lzZRS,
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) >=0 and months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) <=3  THEN '1' ELSE '0' END ) AS glFXRS1, 
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) > 3 and months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) <=6  THEN '1' ELSE '0' END ) AS glFXRS2, 
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) > 6 and months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) <=12  THEN '1' ELSE '0' END )AS glFXRS3, 
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) > 12 and months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) <=24  THEN '1' ELSE '0' END ) AS glFXRS4, 
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) > 24 and months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) <=36  THEN '1' ELSE '0' END ) AS glFXRS5,
+			SUM(CASE when months_between(to_date(LE.LEAVE_DATE),to_date(E.ENTRY_DATE)) > 36 THEN '1' ELSE '0' END ) AS glFXRS6 						
+			]]>
+		FROM T_LEAVE_EMP LE
+		LEFT JOIN T_EMP E ON LE.EMP_ID = E.EMP_ID
+		LEFT JOIN M_ORG O ON E.DEPT_NO=O.ORG_ID
+		WHERE 1=1
+			<if test="leaveEmpCharVO.orgId !=null and leaveEmpCharVO.orgId !=''">
+				and O.BUSINESS_ID  LIKE '${leaveEmpCharVO.orgId}%' 
+			</if>
+			<if test="leaveEmpCharVO.leaveStartDateStr !=null and leaveEmpCharVO.leaveStartDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') >= #{leaveEmpCharVO.leaveStartDateStr}]]>
+			</if>
+			<if test="leaveEmpCharVO.leaveEndDateStr !=null and leaveEmpCharVO.leaveEndDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') <= #{leaveEmpCharVO.leaveEndDateStr}]]>
+			</if>
+	</select>
+	
+	
+	<select id="sjyFXList" parameterType="com.ustcsoft.system.model.LeaveEmpCharVO" 
+	resultType="com.ustcsoft.system.model.LeaveEmpCharVO">
+			select  				
+				S.STUDY_CODE as eduRace,  
+				count(*) eduRaceCount
+<!-- 				(select count(1) from T_LEAVE_EMP) as lzZRS -->
+			from T_LEAVE_EMP LE 
+			left join T_EMP E ON  E.EMP_ID=LE.EMP_ID
+			left join T_STUDY_TYPE S ON  e.EDU_REC=S.STUDY_ID
+			LEFT JOIN M_ORG O ON E.DEPT_NO=O.ORG_ID
+			WHERE 1=1
+			<if test="leaveEmpCharVO.orgId !=null and leaveEmpCharVO.orgId !=''">
+				and O.BUSINESS_ID  LIKE '${leaveEmpCharVO.orgId}%' 
+			</if>
+			<if test="leaveEmpCharVO.leaveStartDateStr !=null and leaveEmpCharVO.leaveStartDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') >= #{leaveEmpCharVO.leaveStartDateStr}]]>
+			</if>
+			<if test="leaveEmpCharVO.leaveEndDateStr !=null and leaveEmpCharVO.leaveEndDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') <= #{leaveEmpCharVO.leaveEndDateStr}]]>
+			</if>
+		group by  S.STUDY_CODE
+	</select>
+	
+		<select id="lzccFXList" parameterType="com.ustcsoft.system.model.LeaveEmpCharVO" 
+	resultType="com.ustcsoft.system.model.LeaveEmpCharVO">
+			select  
+				S.STATION_TYPE as stationType,
+				count(*) as stationTypeCount
+<!-- 				(select count(1) from T_LEAVE_EMP) as lzZRS -->
+			from T_LEAVE_EMP LE 
+			left join T_EMP E ON  E.EMP_ID=LE.EMP_ID
+			left join T_STATION S ON  E.STATION_ID=S.STATION_ID
+			LEFT JOIN M_ORG O ON E.DEPT_NO=O.ORG_ID
+			WHERE 1=1
+			<if test="leaveEmpCharVO.orgId !=null and leaveEmpCharVO.orgId !=''">
+				and O.BUSINESS_ID  LIKE '${leaveEmpCharVO.orgId}%' 
+			</if>
+			<if test="leaveEmpCharVO.leaveStartDateStr !=null and leaveEmpCharVO.leaveStartDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') >= #{leaveEmpCharVO.leaveStartDateStr}]]>
+			</if>
+			<if test="leaveEmpCharVO.leaveEndDateStr !=null and leaveEmpCharVO.leaveEndDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') <= #{leaveEmpCharVO.leaveEndDateStr}]]>
+			</if>
+		group by  S.STATION_TYPE
+	</select>
+	
+	<select id="gwFXList" parameterType="com.ustcsoft.system.model.LeaveEmpCharVO" 
+	resultType="com.ustcsoft.system.model.LeaveEmpCharVO">
+			select  
+				S.STATION_NAME as stationName,
+				count(*) as stationNameCount,
+				(select count(1) from T_LEAVE_EMP) as lzZRS
+			from T_LEAVE_EMP LE 
+			left join T_EMP E ON  E.EMP_ID=LE.EMP_ID
+			left join T_STATION S ON  E.STATION_ID=S.STATION_ID
+			LEFT JOIN M_ORG O ON E.DEPT_NO=O.ORG_ID
+			WHERE 1=1
+			<if test="leaveEmpCharVO.orgId !=null and leaveEmpCharVO.orgId !=''">
+				and O.BUSINESS_ID  LIKE '${leaveEmpCharVO.orgId}%' 
+			</if>
+			<if test="leaveEmpCharVO.leaveStartDateStr !=null and leaveEmpCharVO.leaveStartDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') >= #{leaveEmpCharVO.leaveStartDateStr}]]>
+			</if>
+			<if test="leaveEmpCharVO.leaveEndDateStr !=null and leaveEmpCharVO.leaveEndDateStr !=''">
+				<![CDATA[ and to_char(LE.LEAVE_DATE,'YYYY-MM-DD') <= #{leaveEmpCharVO.leaveEndDateStr}]]>
+			</if>
+		group by  S.STATION_NAME
+	</select>
+</mapper>

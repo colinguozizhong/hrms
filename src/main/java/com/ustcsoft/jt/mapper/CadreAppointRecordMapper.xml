@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.CadreAppointRecordMapper">
+	 <!-- 功能说明:带分页的查询干部任命申请单信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.CadreAppointRecordVO" parameterType="com.ustcsoft.system.model.CadreAppointRecordVO">
+	     SELECT 
+	     			A.APPLY_ID AS applyId,
+	      			A.EMP_ID AS empId,
+					A.XING_MING AS xingMing,
+					A.XING_BIE AS xingBie,
+					A.CHU_SHENG_RI_QI AS chuShengRiQi,
+					A.CHU_SHENG_DI AS chuShengDi,
+					A.MIN_ZU AS minZu,
+					A.JI_GUAN AS jiGuan,
+					A.RU_DANG_SHIU_JIAN AS ruDangShiJian,
+					A.GONG_ZUO_SHI_JIAN AS gongZuoShiJian,
+					A.JIAN_KANG_ZHUANG_KUANG AS jianKangZhuangKuang,
+					A.JI_SHU_ZHI_WU AS jiShuZhiWu,
+					A.ZHUAN_CHANG AS zhuanChang,
+					A.RI_ZHI_JIAO_YU AS riZhiJiaoYu,
+					A.XUE_XIAO AS xueXiao,
+					A.XIAN_REN_ZHI_WU AS xianRenZhiWu,
+					A.NI_REN_ZHI_WU AS niRenZhiWu,
+					A.NI_MIAN_ZHI_WU AS niMianZhiWu,
+					A.JIAN_LI AS jianLi,
+					A.JIANG_CHENG AS jiangCheng,
+					A.NIAN_DU_KAO_HE AS nianDuKaoHe,
+					A.REN_MIAN_LI_YOU AS renMianLiYou,
+					A.DAN_WEI_YI_JIAN AS danWeiYiJian,
+					A.SHEN_PI_YI_JIAN AS shenPiYiJian,
+					A.JI_GUAN_YI_JIAN AS jiGuanYiJian
+		FROM T_APPOINT_APPLY A 
+		LEFT JOIN T_EMP E1 ON A.EMP_ID = E1.EMP_ID
+		LEFT JOIN M_ORG O ON E1.DEPT_NO = O.ORG_ID
+		WHERE  O.BUSINESS_ID like '%${cadreAppointRecord.deptNO}%'
+		<if test="cadreAppointRecord.empName!= null and cadreAppointRecord.empName!=''">
+				and E1.EMP_NAME like '%${cadreAppointRecord.xingMing}%'
+		</if>
+<!-- 		<if test="cadreAppointRecord.appDateStart!= null and cadreAppointRecord.appDateStart!= ''"> -->
+<!-- 				<![CDATA[ and to_char(APP_DATE,'YYYY-MM-DD') >= #{cadreAppointRecord.appDateStart}]]> -->
+<!-- 		</if> -->
+<!-- 		<if test="cadreAppointRecord.appDateEnd!= null and cadreAppointRecord.appDateEnd!=''"> -->
+<!-- 				<![CDATA[ and to_char(APP_DATE,'YYYY-MM-DD') <= #{cadreAppointRecord.appDateEnd}]]> -->
+<!-- 		</if> -->
+		ORDER BY A.CREATE_DATE DESC
+	</select>
+	
+	<select id="findCaderAppointById" resultType="com.ustcsoft.system.model.CadreAppointRecordVO" parameterType="com.ustcsoft.system.model.CadreAppointRecordVO">
+	     SELECT 
+	     			A.APPLY_ID AS applyId,
+	      			A.EMP_ID AS empId,
+					A.XING_MING AS xingMing,
+					A.XING_BIE AS xingBie,
+					A.CHU_SHENG_RI_QI AS chuShengRiQi,
+					A.CHU_SHENG_DI AS chuShengDi,
+					A.MIN_ZU AS minZu,
+					A.JI_GUAN AS jiGuan,
+					A.RU_DANG_SHIU_JIAN AS ruDangShiJian,
+					A.GONG_ZUO_SHI_JIAN AS gongZuoShiJian,
+					A.JIAN_KANG_ZHUANG_KUANG AS jianKangZhuangKuang,
+					A.JI_SHU_ZHI_WU AS jiShuZhiWu,
+					A.ZHUAN_CHANG AS zhuanChang,
+					e.STUDY_NAME AS riZhiJiaoYu,
+					A.XUE_XIAO AS xueXiao,
+					A.XIAN_REN_ZHI_WU AS xianRenZhiWu,
+					A.NI_REN_ZHI_WU AS niRenZhiWu,
+					A.NI_MIAN_ZHI_WU AS niMianZhiWu,
+					A.JIAN_LI AS jianLi,
+					A.JIANG_CHENG AS jiangCheng,
+					A.NIAN_DU_KAO_HE AS nianDuKaoHe,
+					A.REN_MIAN_LI_YOU AS renMianLiYou,
+					A.DAN_WEI_YI_JIAN AS danWeiYiJian,
+					A.SHEN_PI_YI_JIAN AS shenPiYiJian,
+					A.JI_GUAN_YI_JIAN AS jiGuanYiJian
+		FROM T_APPOINT_APPLY A 
+		left join T_STUDY_TYPE e on A.RI_ZHI_JIAO_YU = e.STUDY_CODE 
+		WHERE  A.APPLY_ID = #{applyId}
+	</select>
+	
+		<!--  功能说明:新增干部任命申请单-->
+	<insert id="insertCadreAppointRecord"  parameterType="com.ustcsoft.system.model.CadreAppointRecordVO">
+		insert into T_APPOINT_APPLY(
+					APPLY_ID,
+					EMP_ID,
+					XING_MING,
+					XING_BIE,
+					CHU_SHENG_RI_QI,
+					CHU_SHENG_DI,
+					MIN_ZU,
+					JI_GUAN,
+					RU_DANG_SHIU_JIAN,
+					GONG_ZUO_SHI_JIAN,
+					JIAN_KANG_ZHUANG_KUANG,
+					JI_SHU_ZHI_WU,
+					ZHUAN_CHANG,
+					RI_ZHI_JIAO_YU,
+					XUE_XIAO,
+					XIAN_REN_ZHI_WU,
+					NI_REN_ZHI_WU,
+					NI_MIAN_ZHI_WU,
+					JIAN_LI,
+					JIANG_CHENG,
+					NIAN_DU_KAO_HE,
+					REN_MIAN_LI_YOU,
+					DAN_WEI_YI_JIAN,
+					SHEN_PI_YI_JIAN,
+					JI_GUAN_YI_JIAN,
+					CREATER,
+					CREATE_DATE
+		                ) values 
+	        	   (
+				   #{applyId},
+				   #{empId},
+				   #{xingMing},
+				   #{xingBie},
+				   <![CDATA[to_date(#{chuShengRiQi},'YYYY-MM-DD')]]>,
+				   #{chuShengDi},
+				   #{minZu},
+				   #{jiGuan},
+				   <![CDATA[to_date(#{ruDangShiJian},'YYYY-MM-DD')]]>,
+				   <![CDATA[to_date(#{gongZuoShiJian},'YYYY-MM-DD')]]>,
+				   #{jianKangZhuangKuang},
+				   #{jiShuZhiWu},
+				   #{zhuanChang},
+				   #{riZhiJiaoYu},
+				   #{xueXiao},
+				   #{xianRenZhiWu},
+				   #{niRenZhiWu},
+				   #{niMianZhiWu},
+				   #{jianLi},
+				   #{jiangCheng},
+				   #{nianDuKaoHe},
+				   #{renMianLiYou},
+				   #{danWeiYiJian},
+				   #{shenPiYiJian},
+				   #{jiGuanYiJian},
+				   #{creater}
+				   <![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+	              )	
+	</insert>
+	
+	<!--  功能说明:根据人员id删除学历信息-->
+	<delete id="deleteCadreAppointRecord" parameterType="java.util.List">
+		DELETE FROM T_APPOINT_APPLY
+		WHERE APPLY_ID IN
+		<foreach collection="list" item="applyId"
+            index="index" open="(" close=")" separator=",">
+            #{applyId}
+        </foreach>
+	</delete>
+	
+	<!--  功能说明:更新干部任命申请单-->
+	<update id="updateCadreAppointRecord"  parameterType="com.ustcsoft.system.model.CadreAppointRecordVO">
+		UPDATE T_APPOINT_APPLY
+	    SET
+					EMP_ID = #{empId},
+					XING_MING = #{xingMing},
+					XING_BIE = #{xingBie},
+					CHU_SHENG_RI_QI =  <![CDATA[to_date(#{chuShengRiQi},'YYYY-MM-DD')]]>,
+					CHU_SHENG_DI = #{chuShengDi},
+					MIN_ZU = #{minZu},
+					JI_GUAN =  #{jiGuan},
+					RU_DANG_SHIU_JIAN = <![CDATA[to_date(#{ruDangShiJian},'YYYY-MM-DD')]]>,
+					GONG_ZUO_SHI_JIAN =<![CDATA[to_date(#{gongZuoShiJian},'YYYY-MM-DD')]]>,
+					JIAN_KANG_ZHUANG_KUANG = #{jianKangZhuangKuang},
+					JI_SHU_ZHI_WU =#{jiShuZhiWu},
+					ZHUAN_CHANG =  #{zhuanChang},
+					RI_ZHI_JIAO_YU = #{riZhiJiaoYu},
+					XUE_XIAO =#{xueXiao},
+					XIAN_REN_ZHI_WU =#{xianRenZhiWu},
+					NI_REN_ZHI_WU =#{niRenZhiWu},
+					NI_MIAN_ZHI_WU = #{niMianZhiWu},
+					JIAN_LI =#{jianLi},
+					JIANG_CHENG =#{jiangCheng},
+					NIAN_DU_KAO_HE = #{nianDuKaoHe},
+					REN_MIAN_LI_YOU = #{renMianLiYou},
+					DAN_WEI_YI_JIAN = #{danWeiYiJian},
+					SHEN_PI_YI_JIAN = #{shenPiYiJian},
+					JI_GUAN_YI_JIAN =#{jiGuanYiJian}
+		WHERE APPLY_ID=#{applyId}
+	</update>
+	
+		<insert id="insertJiaTingChengYuan"  parameterType="com.ustcsoft.system.model.FamilyVO">
+		insert into T_EMP_FAMILY(
+					ID,
+					EMP_ID,
+					CHENG_WEI,
+					XING_MING,
+					NIAN_LING,
+					ZHENG_ZHI_MIAN_MAO,
+					GONG_ZUO_ZHI_WU,
+					CREATE_DATE
+		                ) values 
+	        	   (
+				   #{id},
+				   #{empId},
+				   #{chengWei},
+				   #{xingMingJt},
+				   #{nianLing},
+				   #{zhengZhiMianMao},
+				   #{gongZuoZhiWu},
+				   #{createTime}
+	              )	
+	</insert>
+	
+		<update id="updateJiaTingChengYuan"  parameterType="com.ustcsoft.system.model.FamilyVO">
+			update T_EMP_FAMILY
+			set
+					EMP_ID= #{empId},
+					CHENG_WEI = #{chengWei},
+					XING_MING = #{xingMingJt},
+					NIAN_LING= #{nianLing},
+					ZHENG_ZHI_MIAN_MAO=  #{zhengZhiMianMao},
+					GONG_ZUO_ZHI_WU = #{gongZuoZhiWu}
+			where ID= #{id}
+	</update>
+	
+	<select id="findJiaTingChengYuanPage" resultType="com.ustcsoft.system.model.FamilyVO" parameterType="java.lang.String">
+	     SELECT 
+	      			ID AS id,
+					EMP_ID AS empId,
+					CHENG_WEI AS chengWei,
+					XING_MING AS xingMingJt,
+					NIAN_LING AS nianLing,
+					ZHENG_ZHI_MIAN_MAO AS zhengZhiMianMao,
+					GONG_ZUO_ZHI_WU AS gongZuoZhiWu
+		FROM T_EMP_FAMILY 
+		WHERE  EMP_ID =  #{empId}
+		ORDER BY CREATE_DATE ASC
+	</select>
+	<select id="findJiaTingChengYuan" resultType="com.ustcsoft.system.model.FamilyVO" parameterType="java.lang.String">
+	     SELECT 
+	      			ID AS id,
+					EMP_ID AS empId,
+					CHENG_WEI AS chengWei,
+					XING_MING AS xingMingJt,
+					NIAN_LING AS nianLing,
+					ZHENG_ZHI_MIAN_MAO AS zhengZhiMianMao,
+					GONG_ZUO_ZHI_WU AS gongZuoZhiWu
+		FROM T_EMP_FAMILY 
+		WHERE  EMP_ID =  #{empId}
+		ORDER BY CREATE_DATE ASC
+	</select>
+	
+	<delete id="deleteJiaTingChengYuan"  parameterType="java.lang.String">
+			delete from T_EMP_FAMILY where ID = #{id}
+	</delete>
+</mapper>

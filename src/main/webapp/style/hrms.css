@@ -1,0 +1,42 @@
+/**
+ * Created in 2017.3.23
+ * Created to define the styles of some special components in the hrms project. 
+ * Created by FanYou
+ */
+
+/* 定义人事报表样式 --start */
+table.gridtable {
+    font-family: verdana, arial, sans-serif;
+    font-size: 12px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #ccc;
+    border-collapse: collapse;
+}
+table.gridtable th {
+    font-weight: inherit;
+    border-width: 1px;
+    padding: 8px;
+    border-style: inset;
+    border-color: #ccc;
+    background-color: #f0f0f0;
+}
+table.gridtable td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: inset;
+    border-color: #ccc;
+    background-color: #f0f0f0;
+}
+/* 插入表格的新行样式 --start */
+table.gridtable thead td.myClass {
+    font-weight: inherit;
+    text-align: center;
+    border-color: #ccc;
+    background-color: #f0f0f0;
+}
+table.gridtable thead td.myClassLeft {
+    text-align: left;
+}
+/* 插入表格的新行样式 --end */
+/* 定义人事报表样式 --end */

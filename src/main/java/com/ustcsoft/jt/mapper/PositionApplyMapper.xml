@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.PositionApplyMapper">
+	 <!-- 功能说明:带分页的查询职称申请单信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.PositionApplyVO" parameterType="com.ustcsoft.system.model.PositionApplyVO">
+	     SELECT 
+	        H.VOUCHER_NO AS headId,
+	        H.STATUS AS appStatus,
+			H.ORG_ID AS orgId,
+			H.CREATER AS createPer,
+			H.CREATE_DATE AS createDate,
+			H.VERIFY_PER AS verifyPer,
+			H.VERIFY_DATE AS verifyDate,
+			H.REMARK AS remark,
+			D.ID AS detailId,
+			D.APPLY_EMP_ID AS applyEmpId,
+			D.APPLY_DATE AS applyDate,
+			D.APPLY_REASON AS applyReason,
+			D.OLD_STATION_CODE AS oldStationId,
+			D.OLD_POSITION AS oldPositionId,
+			D.OLD_JOB AS oldJob,
+			D.APP_POSITION AS appPositionId,
+			D.APP_STATION_CODE AS appStationId,
+			D.APP_JOB AS appJob,
+			P1.POSITION_NAME AS appPositionName,
+			P2.POSITION_NAME AS oldPositionName,
+			S1.STATION_NAME AS appStationName,
+			S2.STATION_NAME AS oldStationName,
+			E.EMP_NAME AS applyEmpName,
+			O2.ORG_NAME AS orgName
+				FROM  T_POSITION_HEAD H LEFT JOIN T_POSITION_DETAIL D ON H.VOUCHER_NO = D.VOUCHER_NO
+		                        		LEFT JOIN T_POSITION_CODE P1 ON D.APP_POSITION = P1.POSITION_ID
+		                        		LEFT JOIN T_POSITION_CODE P2 ON D.OLD_POSITION = P2.POSITION_ID
+		                        		LEFT JOIN T_STATION S1 ON D.APP_STATION_CODE =  S1.STATION_ID
+		                         		LEFT JOIN T_STATION S2 ON D.OLD_STATION_CODE =  S2.STATION_ID
+		                         		LEFT JOIN T_EMP E ON D.APPLY_EMP_ID = E.EMP_ID
+		                         		LEFT JOIN M_ORG O2 ON E.E.DEPT_NO = O2.ORG_ID
+		                      			LEFT JOIN M_ORG O ON H.ORG_ID = O.ORG_ID
+		    WHERE O2.BUSINESS_ID like '%${positionApply.dept}%'
+			<if test="positionApply.applyEmpName!= null and positionApply.applyEmpName!=''">
+					and E.EMP_NAME like '%${positionApply.applyEmpName}%'
+			</if>
+			<if test="positionApply.applyDateStart!= null and positionApply.applyDateStart!= ''">
+					<![CDATA[ and to_char(APPLY_DATE,'YYYY-MM-DD') >= #{positionApply.applyDateStart}]]>
+			</if>
+			<if test="positionApply.applyDateEnd!= null and positionApply.applyDateEnd!=''">
+					<![CDATA[ and to_char(APPLY_DATE,'YYYY-MM-DD') <= #{positionApply.applyDateEnd}]]>
+			</if>
+			<if test="positionApply.appPositionId!=null and positionApply.appPositionId!=''">
+					and D.APP_POSITION = #{positionApply.appPositionId}
+			</if>
+			<if test="positionApply.appStatus!=null and positionApply.appStatus!=''">
+					and H.STATUS = #{positionApply.appStatus}
+			</if>
+			ORDER BY H.CREATE_DATE DESC
+	</select>
+	
+	<!--  功能说明:新增职称申请单(head表)-->
+	<insert id="insertPositionApplyHead"  parameterType="com.ustcsoft.system.model.PositionApplyVO">
+		INSERT INTO T_POSITION_HEAD(
+			VOUCHER_NO
+			<if test="appStatus != null and appStatus != ''">
+				,STATUS
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,ORG_ID
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,CREATER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+			<if test="remark != null and remark != ''">
+				,REMARK
+			</if>
+		) 
+		VALUES 
+		(
+				#{headId}
+			<if test="appStatus != null and appStatus != ''">
+				,#{appStatus}
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,#{orgId}
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,#{createPer}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="remark != null and remark != ''">
+				,#{remark}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:新增职称申请单(detail表)-->
+	<insert id="insertPositionApplyDetail"  parameterType="com.ustcsoft.system.model.PositionApplyVO">
+		INSERT INTO T_POSITION_DETAIL(
+			ID,
+			VOUCHER_NO
+			<if test="applyEmpId != null and applyEmpId != ''">
+				,APPLY_EMP_ID
+			</if>
+			<if test="applyDate != null and applyDate != ''">
+				,APPLY_DATE
+			</if>
+			<if test="applyReason != null and applyReason != ''">
+				,APPLY_REASON
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,OLD_STATION_CODE
+			</if>
+			<if test="oldPositionId != null and oldPositionId != ''">
+				,OLD_POSITION
+			</if>
+			<if test="oldJob != null and oldJob != ''">
+				,OLD_JOB
+			</if>
+			<if test="appPositionId != null and appPositionId != ''">
+				,APP_POSITION
+			</if>
+			<if test="appStationId != null and appStationId != ''">
+				,APP_STATION_CODE
+			</if>
+			<if test="appJob != null and appJob != ''">
+				,APP_JOB
+			</if>
+		) 
+		VALUES 
+		(
+				#{detailId},
+				#{headId}
+			<if test="applyEmpId != null and applyEmpId != ''">
+				,#{applyEmpId}
+			</if>
+			<if test="applyDate != null and applyDate != ''">
+				<![CDATA[,to_date(#{applyDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="applyReason != null and applyReason != ''">
+				,#{applyReason}
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,#{oldStationId}
+			</if>
+			<if test="oldPositionId != null and oldPositionId != ''">
+				,#{oldPositionId}
+			</if>
+			<if test="oldJob != null and oldJob != ''">
+				,#{oldJob}
+			</if>
+			<if test="appPositionId != null and appPositionId != ''">
+				,#{appPositionId}
+			</if>
+			<if test="appStationId != null and appStationId != ''">
+				,#{appStationId}
+			</if>
+			<if test="appJob != null and appJob != ''">
+				,#{appJob}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:根据id删除后备干部申请单（head)-->
+	<delete id="deletePositionApplyHead" parameterType="java.lang.String">
+		DELETE FROM T_POSITION_HEAD
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	<!--  功能说明:根据id删除后备干部申请单（detail)-->
+	<delete id="deletePositionApplyDetail" parameterType="java.lang.String">
+		DELETE FROM T_POSITION_DETAIL
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	<!--  功能说明:更新职称申请单-->
+	<update id="updatePositionApply"  parameterType="com.ustcsoft.system.model.PositionApplyVO">
+		UPDATE T_POSITION_DETAIL
+			<set>
+				<if test="applyEmpId != null">
+					APPLY_EMP_ID=#{applyEmpId},
+				</if>
+				<if test="applyDate != null">
+					<![CDATA[APPLY_DATE=to_date(#{applyDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="applyReason != null">
+					APPLY_REASON=#{applyReason},
+				</if>
+				<if test="oldStationId != null">
+					OLD_STATION_CODE=#{oldStationId},
+				</if>
+				<if test="oldPositionId != null">
+					OLD_POSITION=#{oldPositionId},
+				</if>
+				<if test="oldJob != null">
+					OLD_JOB=#{oldJob},
+				</if>
+				<if test="appStationId != null">
+					APP_STATION_CODE=#{appStationId},
+				</if>
+				<if test="appPositionId != null">
+					APP_POSITION=#{appPositionId},
+				</if>
+				<if test="appJob != null">
+					APP_JOB=#{appJob},
+				</if>
+				<if test="verifyPer != null">
+					VERIFY_PER=#{verifyPer},
+				</if>
+				<if test="verifyDate != null">
+					<![CDATA[VERIFY_DATE=to_date(#{verifyDate},'YYYY-MM-DD'),]]>
+				</if>
+			</set>
+		WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:提交职称申请单-->
+	<update id="submitPositionApply"  parameterType="java.lang.String">
+				UPDATE T_POSITION_HEAD
+					<set>
+							STATUS=1
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:审核职称申请单-->
+	<update id="verifyPositionApply"  parameterType="com.ustcsoft.system.model.PositionApplyVO">
+				UPDATE T_POSITION_HEAD
+					<set>
+						<if test="appStatus != null">
+							STATUS=#{appStatus},
+						</if>
+						<if test="verifyPer != null">
+							VERIFY_PER=#{verifyPer},
+						</if>
+						<if test="verifyDate != null">
+						<![CDATA[VERIFY_DATE=to_date(#{verifyDate},'YYYY-MM-DD hh24:mi:ss'),]]>
+						</if>
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+</mapper>

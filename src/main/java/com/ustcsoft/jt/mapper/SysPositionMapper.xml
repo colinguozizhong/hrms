@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysPositionMapper">
+	
+	<!-- 功能说明:所有职称类型的列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysPositionTypeVO" parameterType="com.ustcsoft.system.model.SysPositionTypeVO">
+	      SELECT 
+	      	P.POSITION_ID AS positionId,
+			P.POSITION_NAME AS positionName,
+			P.POSITION_PRO AS positionPro,
+			P.POSITON_GRADE AS positionGrade,
+			P.CREATER AS creater,
+			P.CREATE_DATE AS createDate
+		FROM T_POSITION_CODE P
+		ORDER BY P.POSITION_ID desc
+	</select>
+	
+	<!-- 功能说明:所有职称类型类型的列表 -->
+	<select id="listAll" resultType="com.ustcsoft.system.model.SysPositionTypeVO" parameterType="com.ustcsoft.system.model.SysPositionTypeVO">
+	     SELECT 
+	      	P.POSITION_ID AS positionId,
+			P.POSITION_NAME AS positionName,
+			P.POSITION_PRO AS positionPro,
+			P.POSITON_GRADE AS positionGrade
+		FROM T_POSITION_CODE P 
+		WHERE 1=1
+	</select>
+	
+	<!-- 功能说明:所有专业类型类型的列表 -->
+	<select id="loadProfession" resultType="com.ustcsoft.system.model.SysProfessionTypeVO" parameterType="com.ustcsoft.system.model.SysProfessionTypeVO">
+	     SELECT 
+	      	PRO_CODE AS proCode,
+			PRO_NAME AS proName
+		FROM T_POSITION_PRO	
+		WHERE 1=1
+	</select>
+	
+	<!-- 功能说明:检查职称编码是否已存在-->
+	<select id="checkPositionId" resultType="com.ustcsoft.system.model.SysPositionTypeVO" parameterType="java.lang.String">
+	     SELECT 
+	      	P.POSITION_ID AS positionId
+		FROM T_POSITION_CODE P 
+		WHERE  P.POSITION_ID = #{positionId}
+	</select>
+	
+	<!-- 功能说明:加载一条职称类型信息 -->
+	<select id="loadPositionTypeInformation" resultType="com.ustcsoft.system.model.SysPositionTypeVO" parameterType="com.ustcsoft.system.model.SysPositionTypeVO">
+	      SELECT 
+	      	P.POSITION_ID AS positionId,
+			P.POSITION_NAME AS positionName,
+			P.POSITION_PRO AS positionPro,
+			P.POSITON_GRADE AS positionGrade
+			FROM T_POSITION_CODE P
+		WHERE P.POSITION_ID = #{positionId}
+	</select>
+	
+		<!--  功能说明:新增职称类型信息-->
+	<insert id="addPositionType"  parameterType="com.ustcsoft.system.model.SysPositionTypeVO">
+		insert into T_POSITION_CODE(
+					POSITION_ID,
+					POSITION_NAME,
+					POSITION_PRO,
+					POSITON_GRADE,
+					CREATER,
+					CREATE_DATE
+		                ) values 
+	        	   (
+				   #{positionId},
+				   #{positionName},
+				   #{proName},
+				   #{positionGrade},
+				   #{creater},
+				   #{createDate}
+	              )	
+	</insert>
+	
+	<!--  功能说明:更新职称类型信息-->
+	<update id="updatePositionType"  parameterType="com.ustcsoft.system.model.SysPositionTypeVO">
+		UPDATE T_POSITION_CODE
+			<set>
+				<if test="positionName != null">
+					POSITION_NAME=#{positionName},
+				</if>
+				<if test="proName != null">
+					POSITION_PRO=#{proName},
+				</if>
+				<if test="positionGrade != null">
+					POSITON_GRADE=#{positionGrade},
+				</if>
+			</set>
+		WHERE POSITION_ID=#{positionId}
+	</update>
+	
+	<!--  功能说明:根据id删除岗位类型信息-->
+	<delete id="deletePositionType" parameterType="java.util.List">
+		DELETE FROM T_POSITION_CODE
+		WHERE POSITION_ID IN
+		<foreach collection="list" item="positionId"
+            index="index" open="(" close=")" separator=",">
+            #{positionId}
+        </foreach>
+	</delete>
+</mapper>

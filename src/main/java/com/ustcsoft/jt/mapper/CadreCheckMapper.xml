@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.CadreCheckMapper">
+	 <!-- 功能说明:带分页的查询干部任命申请单信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.CadreCheckVO" parameterType="com.ustcsoft.system.model.CadreCheckVO">
+	     SELECT 
+	      	C.CHECK_ID AS cadreCheckId,
+	      	C.EMP_ID AS empId,
+			C.CHECK_DATE AS checkDate,
+			C.CHECK_CONTENT AS checkContent,
+			C.CHECK_RESULT AS checkResult,
+			C.CHECK_COMMENT AS checkComment,
+			C.CHECK_SCORE AS checkScore,
+			C.CHECK_PER AS checkPerId,
+			C.CREATE_PER AS createPer,
+			C.CREATE_DATE AS createDate,
+			E1.EMP_NAME AS empName,
+			E1.EMP_JOB AS job,
+			S.STATION_NAME AS stationName,
+			E2.EMP_NAME AS checkPerName,
+			O.ORG_NAME AS dept
+	        FROM 
+	        	T_CHECK_REC C  
+	        LEFT JOIN T_EMP E1 ON C.EMP_ID = E1.EMP_ID
+	        LEFT JOIN T_STATION S ON E1.STATION_ID = S.STATION_ID
+	        LEFT JOIN T_EMP E2 ON C.CHECK_PER = E2.EMP_ID
+	        LEFT JOIN M_ORG O ON E1.DEPT_NO = O.ORG_ID
+		WHERE O.BUSINESS_ID like '%${cadreCheck.dept}%'
+		<if test="cadreCheck.empName!= null and cadreCheck.empName!=''">
+				and E1.EMP_NAME like '%${cadreCheck.empName}%'
+		</if>
+		<if test="cadreCheck.checkDateStart!= null and cadreCheck.checkDateStart!= ''">
+				<![CDATA[ and to_char(CHECK_DATE,'YYYY-MM-DD') >= #{cadreCheck.checkDateStart}]]>
+		</if>
+		<if test="cadreCheck.checkDateEnd!= null and cadreCheck.checkDateEnd!=''">
+				<![CDATA[ and to_char(CHECK_DATE,'YYYY-MM-DD') <= #{cadreCheck.checkDateEnd}]]>
+		</if>
+		ORDER BY C.CREATE_DATE DESC
+	</select>
+	
+		<!--  功能说明:新增干部任命申请单-->
+	<insert id="insertCadreCheck"  parameterType="com.ustcsoft.system.model.CadreCheckVO">
+		insert into T_CHECK_REC(
+					CHECK_ID,
+					EMP_ID,
+					CHECK_DATE,
+					CHECK_CONTENT,
+					CHECK_RESULT,
+					CHECK_COMMENT,
+					CHECK_SCORE,
+					CHECK_PER,
+					CREATE_PER,
+					CREATE_DATE
+		                ) values 
+	        	   (
+				   #{cadreCheckId},
+				   #{empId}
+				   <![CDATA[,to_date(#{checkDate},'YYYY-MM-DD hh24:mi:ss')]]>,
+				   #{checkContent},
+				   #{checkResult},
+				   #{checkComment},
+				   #{checkScore},
+				   #{checkPerId},
+				   #{createPer}
+				   <![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+	              )	
+	</insert>
+	
+	<!--  功能说明:更新干部考核信息-->
+	<update id="updateCadreCheck"  parameterType="com.ustcsoft.system.model.CadreCheckVO">
+		UPDATE T_CHECK_REC
+			<set>
+				<if test="empId != null">
+					EMP_ID=#{empId},
+				</if>
+				<if test="checkDate != null">
+					<![CDATA[CHECK_DATE=to_date(#{checkDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="checkContent != null">
+					CHECK_CONTENT=#{checkContent},
+				</if>
+				<if test="checkResult != null">
+					CHECK_RESULT=#{checkResult},
+				</if>
+				<if test="checkComment != null">
+					CHECK_COMMENT=#{checkComment},
+				</if>
+				<if test="checkScore != null">
+					CHECK_SCORE=#{checkScore},
+				</if>
+				<if test="checkPerId != null">
+					CHECK_PER=#{checkPerId},
+				</if>
+			</set>
+		WHERE CHECK_ID=#{cadreCheckId}
+	</update>
+	
+	<!--  功能说明:根据id删除干部考核-->
+	<delete id="deleteCadreCheck" parameterType="java.util.List">
+		DELETE FROM T_CHECK_REC
+		WHERE CHECK_ID IN
+		<foreach collection="list" item="cadreCheckId"
+            index="index" open="(" close=")" separator=",">
+            #{cadreCheckId}
+        </foreach>
+	</delete>
+</mapper>

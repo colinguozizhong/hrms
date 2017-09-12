@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysStationRecMapper">
+	<!-- 功能说明:带分页的查询岗位列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SystemStationRecVO" parameterType="com.ustcsoft.system.model.SystemStationRecVO">
+	     SELECT 
+			s.ID AS id,
+			s.EMP_ID AS empId,
+			s.DEPT_NO AS deptNo,
+			s.OLD_STATION_ID AS oldStationId,
+			s.OLD_STATION_GRADE AS oldStationGrade,
+			s.OLD_POSITION AS oldPosition,
+			s.NEW_DEPT_NO AS newDeptNo,
+			s.NEW_STATION_ID AS newStationId,
+			s.NEW_STATION_GRADE AS newStationGrade,
+			s.NEW_PROSITON AS newPrositon,
+			s.ALTER_DATE AS alterDate,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			s1.STATION_NAME AS oldStationName,
+			s2.STATION_NAME AS newStationName,
+			o.ORG_NAME AS deptName
+		FROM T_STATION_REC s
+		LEFT JOIN T_STATION s1
+		ON s.OLD_STATION_ID=s1.STATION_ID
+		LEFT JOIN T_STATION s2
+		ON s.NEW_STATION_ID=s2.STATION_ID
+		LEFT JOIN M_ORG o
+		ON s.DEPT_NO=o.ORG_ID
+		WHERE 1=1
+		<if test="rec.empId != null and rec.empId != ''">
+				and EMP_ID = #{rec.empId}
+		</if>
+		ORDER BY s.CREATE_DATE DESC
+	</select>
+	
+	<!-- 功能说明:加载一条岗位信息 -->
+	<select id="load" resultType="com.ustcsoft.system.model.SystemStationRecVO" parameterType="java.lang.String">
+	     SELECT 
+			s.ID AS id,
+			s.EMP_ID AS empId,
+			s.DEPT_NO AS deptNo,
+			s.OLD_STATION_ID AS oldStationId,
+			s.OLD_STATION_GRADE AS oldStationGrade,
+			s.OLD_POSITION AS oldPosition,
+			s.NEW_DEPT_NO AS newDeptNo,
+			s.NEW_STATION_ID AS newStationId,
+			s.NEW_STATION_GRADE AS newStationGrade,
+			s.NEW_PROSITON AS newPrositon,
+			s.ALTER_DATE AS alterDate,
+			s.CREATE_PER AS creater,
+			s.CREATE_DATE AS createDate,
+			s1.STATION_NAME AS oldStationName,
+			s2.STATION_NAME AS newStationName,
+			o1.ORG_NAME AS deptName,
+			o2.ORG_NAME AS newDeptName
+		FROM T_STATION_REC s
+		LEFT JOIN T_STATION s1
+		ON s.OLD_STATION_ID=s1.STATION_ID
+		LEFT JOIN T_STATION s2
+		ON s.NEW_STATION_ID=s2.STATION_ID
+		LEFT JOIN M_ORG o1
+		ON s.DEPT_NO=o1.ORG_ID
+		LEFT JOIN M_ORG o2
+		ON s.DEPT_NO=o2.ORG_ID
+		WHERE s.ID = #{id}
+	</select>
+	
+	<!--  功能说明:添加岗位信息-->
+	<insert id="add"  parameterType="com.ustcsoft.system.model.SystemStationRecVO">
+		INSERT INTO T_STATION_REC(
+			ID
+			<if test="empId != null and empId != ''">
+				,EMP_ID
+			</if>
+			<if test="deptNo != null and deptNo != ''">
+				,DEPT_NO
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,OLD_STATION_ID
+			</if>
+			<if test="oldStationGrade != null and oldStationGrade != ''">
+				,OLD_STATION_GRADE
+			</if>
+			<if test="oldPosition != null and oldPosition != ''">
+				,OLD_POSITION
+			</if>
+			<if test="newDeptNo != null and newDeptNo != ''">
+				,NEW_DEPT_NO
+			</if>
+			<if test="newStationId != null and newStationId != ''">
+				,NEW_STATION_ID
+			</if>
+			<if test="newStationGrade != null and newStationGrade != ''">
+				,NEW_STATION_GRADE
+			</if>
+			<if test="newPrositon != null and newPrositon != ''">
+				,NEW_PROSITON
+			</if>
+			<if test="alterDate != null and alterDate != ''">
+				,ALTER_DATE
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+		) 
+		VALUES 
+		(
+			#{id}
+			<if test="empId != null and empId != ''">
+				,#{empId}
+			</if>
+			<if test="deptNo != null and deptNo != ''">
+				,#{deptNo}
+			</if>
+			<if test="oldStationId != null and oldStationId != ''">
+				,#{oldStationId}
+			</if>
+			<if test="oldStationGrade != null and oldStationGrade != ''">
+				,#{oldStationGrade}
+			</if>
+			<if test="oldPosition != null and oldPosition != ''">
+				,#{oldPosition}
+			</if>
+			<if test="newDeptNo != null and newDeptNo != ''">
+				,#{newDeptNo}
+			</if>
+			<if test="newStationId != null and newStationId != ''">
+				,#{newStationId}
+			</if>
+			<if test="newStationGrade != null and newStationGrade != ''">
+				,#{newStationGrade}
+			</if>
+			<if test="newPrositon != null and newPrositon != ''">
+				,#{newPrositon}
+			</if>
+			<if test="alterDate != null and alterDate != ''">
+				<![CDATA[,to_date(#{alterDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:根据人员ID删除相关联的岗位信息-->
+	<delete id="deleteByEmpids" parameterType="java.util.List">
+		DELETE FROM T_STATION_REC
+		WHERE EMP_ID IN
+		<foreach collection="list" item="empid"
+            index="index" open="(" close=")" separator=",">
+            #{empid}
+        </foreach>
+	</delete>
+</mapper>

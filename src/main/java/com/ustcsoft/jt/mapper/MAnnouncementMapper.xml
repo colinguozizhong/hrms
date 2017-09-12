@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.MAnnouncementMapper">
+	
+	<!-- 	查询公告列表 -->
+	<select id="searchAnnouncementPage" parameterType="com.ustcsoft.system.model.MAnnouncementVO"
+		resultType="com.ustcsoft.system.model.MAnnouncementVO">
+		select
+			A.ANNOUNCEMENT_ID as announcementId
+			,A.TITLE as title
+			,A.CONTENT as content
+			,A.SENDER_ORG_ID  as senderOrgId
+			,A.DEL_FLG as delFlg
+			,A.CREATER as creater
+			,A.CREATE_TIME as createTime
+			,O.ORG_NAME as senderOrgName
+		from
+			M_ANNOUNCEMENT A
+			left join M_ORG O on A.SENDER_ORG_ID = O.ORG_ID 
+		where
+    		A.SENDER_ORG_ID = #{vo.senderOrgId}  
+    		and A.DEL_FLG = #{vo.delFlg}  
+    	order by A.CREATE_TIME desc
+	</select>
+	
+	<!-- 功能说明:取MAX项目编码ID -->
+	<select id="findMaxAnnouncementId" resultType="java.lang.String">
+		SELECT
+		MAX(ANNOUNCEMENT_ID) as announcementId
+		FROM
+		M_ANNOUNCEMENT 
+	</select>
+	
+<!-- 	新增公告 -->
+	<insert id="insertAnnouncement"  parameterType="com.ustcsoft.system.model.MAnnouncementVO">
+		insert into M_ANNOUNCEMENT (
+			ANNOUNCEMENT_ID
+			,TITLE
+			,CONTENT
+			,SENDER_ORG_ID
+			,DEL_FLG
+			,CREATER
+			,CREATE_TIME
+		) values (
+	     	#{announcementId} 
+			,#{title} 
+			,#{content} 
+			,#{senderOrgId} 
+			,#{delFlg}
+			,#{creater}
+			<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+		)
+	</insert>
+    <!-- 	插入接收单位 -->
+	<insert id="insertReciver"  parameterType="com.ustcsoft.system.model.MAnnouncementReciverVO">
+		insert into M_ANNOUNCEMENT_RECIVER (
+			ANNOUNCEMENT_ID
+			,RECIVER_ORG_ID
+		) values (
+			#{announcementId} 
+			,#{reciverOrgId}
+		)
+	</insert>
+    <!-- 	查询接收单位 -->
+	<select id="searchReciverOrg" parameterType="com.ustcsoft.system.model.MAnnouncementVO" resultType="com.ustcsoft.system.model.MAnnouncementReciverVO">
+		SELECT
+		    R.RECIVER_ORG_ID reciverOrgId,
+		    O.ORG_NAME orgName
+		FROM
+		    M_ANNOUNCEMENT_RECIVER R left join M_ORG O on R.RECIVER_ORG_ID = O.ORG_ID
+		where
+		    R.ANNOUNCEMENT_ID = #{announcementId} 
+	</select>
+    <!-- 	删除接收单位 -->
+	<delete id="deleteReciverByAnnouncementId" parameterType="com.ustcsoft.system.model.MAnnouncementVO">
+		delete from M_ANNOUNCEMENT_RECIVER where ANNOUNCEMENT_ID =  #{announcementId} 
+	</delete>
+<!-- 	修改公告 -->
+	<update id="updateAnnouncement" parameterType="com.ustcsoft.system.model.MAnnouncementVO">
+		update	M_ANNOUNCEMENT
+		set
+			TITLE = #{title}, 
+			CONTENT =#{content} 
+		where
+			ANNOUNCEMENT_ID = #{announcementId}  
+	</update>
+<!-- 	删除公告 -->
+	<delete id="deleteAnnouncement" parameterType="java.lang.String">
+		delete from M_ANNOUNCEMENT where
+			ANNOUNCEMENT_ID = #{announcementId}  
+	</delete>
+<!-- 	加载公告 -->
+	<select id="loadAnnouncement" parameterType="java.lang.String"
+		resultType="com.ustcsoft.system.model.MAnnouncementVO">
+		select
+			A.ANNOUNCEMENT_ID as announcementId
+			,A.TITLE as title
+			,A.CONTENT as content
+			,A.SENDER_ORG_ID as senderOrgId
+			,A.DEL_FLG as delFlg
+			,A.CREATER as creater
+			,A.CREATE_TIME as createTime
+			,O.ORG_NAME as senderOrgName
+		from
+			M_ANNOUNCEMENT A left join M_ORG O on A.SENDER_ORG_ID = O.ORG_ID
+		where
+		    A.ANNOUNCEMENT_ID = #{announcementId}  
+	</select>
+	<select id="searchOrgTree" parameterType="com.ustcsoft.system.model.MAnnouncementReciverVO"
+		resultType="com.ustcsoft.system.model.MAnnouncementReciverVO">
+        SELECT DISTINCT
+		    O.ORG_ID AS orgId,
+		    O.BUSINESS_ID AS businessId,
+		    O.ORG_NAME  AS orgName,
+		    O.ORG_ID AS id,
+		    O.ORG_NAME AS TEXT,
+		    CASE WHEN O.PARENT_ID='0' THEN '0' ELSE '1'  END AS leaf
+		FROM
+			 M_ORG O 
+	    LEFT JOIN   
+	         M_ANNOUNCEMENT_RECIVER R 
+	    ON 
+	         R.RECIVER_ORG_ID =O.ORG_ID   AND R.ANNOUNCEMENT_ID = #{announcementId}  
+		WHERE 
+		     O.BUSINESS_ID LIKE  '%${businessId}%'
+	</select>
+	
+	<!--根据orgId获取对应的businessId-->
+	<select id="searBusinessId"  parameterType="java.lang.String" resultType="java.lang.String" >
+	select  O.BUSINESS_ID businessId
+	       FROM 
+		   M_ORG O 	
+		   where 
+		   O.ORG_ID=#{orgId}
+	</select>
+	<!-- 	查询收到的公告 -->
+	<select id="findMAnnouncementForPage" parameterType="com.ustcsoft.system.model.MAnnouncementVO"
+	 resultType="com.ustcsoft.system.model.MAnnouncementVO">
+		select 
+			A.ANNOUNCEMENT_ID as announcementId,
+			A.TITLE as title,
+			'' as content ,
+			A.SENDER_ORG_ID as senderOrgId,
+		    A.CREATE_TIME as createDate,
+		    O.ORG_NAME  as senderOrgName,
+		    '' as readFlag
+	    from 
+	    	M_ANNOUNCEMENT A 
+	    left join M_ANNOUNCEMENT_RECIVER R on A.ANNOUNCEMENT_ID = R.ANNOUNCEMENT_ID 
+	    left join M_ORG O on A.SENDER_ORG_ID = O.ORG_ID 
+		where R.RECIVER_ORG_ID  = #{mAnnouncementVO.reciverOrgId} and A.DEL_FLG = '00'
+        <if test="mAnnouncementVO.title !=null and mAnnouncementVO.title!=''">
+				and	A.TITLE like '%${mAnnouncementVO.title}%'
+		</if>
+<!-- 		<if test="mAnnouncementVO.startFaBuShiJian !=null and mAnnouncementVO.startFaBuShiJian!=''"> -->
+<!-- 				and	A.CREATE_TIME >= #{mAnnouncementVO.startFaBuShiJian} -->
+<!-- 		</if> -->
+<!-- 		<if test="mAnnouncementVO.endFaBuShiJian !=null and mAnnouncementVO.endFaBuShiJian!=''"> -->
+<!-- 				and	A.CREATE_TIME &lt;= #{mAnnouncementVO.endFaBuShiJian} -->
+<!-- 		</if> -->
+	    order by A.CREATE_TIME desc
+	</select>
+		<!-- 查找用户未阅读公告个数，即该用户对应的公告不在M_USER_PES表中 -->
+	<select id="serchUnreadGG" resultType="java.lang.Integer" 
+	parameterType="com.ustcsoft.system.model.MUserPesVO">
+		select count(1)
+				from (
+						select M.ANNOUNCEMENT_ID AS  ANNOUNCEMENT_ID
+						from M_ANNOUNCEMENT M
+						inner join M_ANNOUNCEMENT_RECIVER R ON M.ANNOUNCEMENT_ID = R.ANNOUNCEMENT_ID
+						left join M_USER U ON U.ORG_ID = R.RECIVER_ORG_ID
+						where U.USER_ID = #{mUserPesVO.userId}
+							and  M.DEL_FLG = '00' 
+						order by M.CREATE_TIME DESC
+				) where NOT EXISTS (
+					select 1 from M_USER_PES 
+					where USER_ID = #{mUserPesVO.userId}
+					and TABLE_NAME = #{mUserPesVO.tableName}
+					and DATA_ID = ANNOUNCEMENT_ID
+					)
+	</select>
+	<!-- 	保存已阅读公告记录 -->
+	<insert id="saveReadGGJL" parameterType="com.ustcsoft.system.model.MUserPesVO">
+		insert into 
+			M_USER_PES(
+				ID,
+				TABLE_NAME,
+				DATA_ID,
+				CREATE_TIME,
+				USER_ID)
+		   values (
+		   		#{mUserPesVO.mUserPesId},
+		   		#{mUserPesVO.tableName},
+		   		#{mUserPesVO.dataId},
+		   		#{mUserPesVO.createTime},
+		   		#{mUserPesVO.userId})
+	</insert>
+	<!-- 	查询用户公告阅读状态 -->
+	<select id="findGGreadFlag" resultType="java.lang.Integer" 
+	parameterType="com.ustcsoft.system.model.MUserPesVO">
+	       select count(1) from M_USER_PES 
+					where USER_ID = #{mUserPesVO.userId}
+					and TABLE_NAME = #{mUserPesVO.tableName}
+					and DATA_ID = #{mUserPesVO.dataId}
+	</select>
+</mapper>

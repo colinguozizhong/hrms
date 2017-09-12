@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysChangeTypeMapper">
+	
+	<!-- 功能说明:带分页的查询人员异动类型列表 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.SysChangeTypeVO" parameterType="com.ustcsoft.system.model.SysChangeTypeVO">
+	    SELECT 
+	    	TYPE_ID AS typeId,
+	    	TYPE_NAME AS typeName,
+	    	CREATE_PER AS creater,
+	    	CREATE_DATE AS createDate
+	    FROM T_CHANGE_TYPE
+		ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<!-- 功能说明:所有异动类型的列表 -->
+	<select id="listAll" resultType="com.ustcsoft.system.model.SysChangeTypeVO" parameterType="com.ustcsoft.system.model.SysChangeTypeVO">
+	     SELECT 
+	      	TYPE_ID AS typeId,
+	    	TYPE_NAME AS typeName,
+	    	CREATE_PER AS creater,
+	    	CREATE_DATE AS createDate
+		FROM T_CHANGE_TYPE
+		ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<!-- 功能说明:加载一条人员异动类型信息 -->
+	<select id="load" resultType="com.ustcsoft.system.model.SysChangeTypeVO" parameterType="java.lang.String">
+	    SELECT 
+	    	TYPE_ID AS typeId,
+	    	TYPE_NAME AS typeName,
+	    	CREATE_PER AS creater,
+	    	CREATE_DATE AS createDate
+	    FROM T_CHANGE_TYPE
+		WHERE TYPE_ID=#{typeId}
+	</select>
+	
+	<!--  功能说明:添加人员异动类型信息-->
+	<insert id="add"  parameterType="com.ustcsoft.system.model.SysChangeTypeVO">
+		INSERT INTO T_CHANGE_TYPE(
+			TYPE_ID
+			<if test="typeName != null and typeName != ''">
+				,TYPE_NAME
+			</if>
+			<if test="creater != null and creater != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+		) 
+		VALUES 
+		(
+			#{typeId}
+			<if test="typeName != null and typeName != ''">
+				,#{typeName}
+			</if>
+			<if test="creater != null and creater != ''">
+				,#{creater}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:更新人员异动类型信息-->
+	<insert id="update"  parameterType="com.ustcsoft.system.model.SysChangeTypeVO">
+		UPDATE T_CHANGE_TYPE
+		<set>
+			<if test="typeName != null">
+				TYPE_NAME=#{typeName},
+			</if>
+		</set>
+		WHERE TYPE_ID=#{typeId}
+	</insert>
+	
+	<!--  功能说明:根据id删除人员异动类型信息-->
+	<delete id="deletes" parameterType="java.util.List">
+		DELETE FROM T_CHANGE_TYPE
+		WHERE TYPE_ID IN
+		<foreach collection="list" item="typeId"
+            index="index" open="(" close=")" separator=",">
+            #{typeId}
+        </foreach>
+	</delete>
+</mapper>

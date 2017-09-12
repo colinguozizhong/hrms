@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.CadreReserveMapper">
+	 <!-- 功能说明:带分页的查询后备干部信息 -->
+	<select id="queryWithPage" resultType="com.ustcsoft.system.model.CadreReserveVO" parameterType="com.ustcsoft.system.model.CadreReserveVO">
+	     SELECT 
+	      	H.VOUCHER_NO AS headId,
+	      	H.STATUS AS appStatus,
+			H.ORG_ID AS orgId,
+			H.REMARK AS remark,
+			D.ID AS detailId,
+			D.RECOMM_EMP_ID AS empId,
+			D.RECOMM_DATE AS recommendDate,
+			D.RECOMM_DEPT AS recommendDeptNO,
+			D.RECOMM_REASON AS recommendReason,
+			D.RECOMM_PER AS recommendPersonId,
+			D.RECOMM_JOB AS recommendJob,
+			D.RECOMM_MAT AS recommendMaterial,
+			D.RECOMM_TIC AS recommendBallot,
+			D.FAILED_REASON AS  failedReason,
+			E1.EMP_NAME AS empName,
+			E2.EMP_NAME AS recommendPersonName,
+			O1.ORG_NAME AS dept,
+			O2.ORG_NAME AS recommendDeptName
+			FROM T_RESERVE_HEAD H 
+						 LEFT JOIN T_RESERVE_DETAIL D ON H.VOUCHER_NO = D.VOUCHER_NO
+						 LEFT JOIN T_EMP E1 ON D.RECOMM_EMP_ID = E1.EMP_ID
+		                 LEFT JOIN T_EMP E2 ON D.RECOMM_PER = E2.EMP_ID
+		                 LEFT JOIN M_ORG O1 ON E1.DEPT_NO = O1.ORG_ID
+		                 LEFT JOIN M_ORG O2 ON D.RECOMM_DEPT = O2.ORG_ID
+		WHERE O1.BUSINESS_ID like '%${cadreReserve.dept}%'
+		<if test="cadreReserve.empName!= null and cadreReserve.empName!=''">
+				and E1.EMP_NAME like '%${cadreReserve.empName}%'
+		</if>
+		<if test="cadreReserve.recommendDateStart!= null and cadreReserve.recommendDateStart!= ''">
+				<![CDATA[ and to_char(RECOMM_DATE,'YYYY-MM-DD') >= #{cadreReserve.recommendDateStart}]]>
+		</if>
+		<if test="cadreReserve.recommendDateEnd!= null and cadreReserve.recommendDateEnd!=''">
+				<![CDATA[ and to_char(RECOMM_DATE,'YYYY-MM-DD') <= #{cadreReserve.recommendDateEnd}]]>
+		</if>
+		<if test="cadreReserve.recommendPersonName!= null and cadreReserve.recommendPersonName!=''">
+				and E2.EMP_NAME like '%${cadreReserve.recommendPersonName}%'
+		</if>
+		<if test="cadreReserve.recommendDeptNO!=null and cadreReserve.recommendDeptNO!=''">
+				and O2.ORG_ID = #{cadreReserve.recommendDeptNO}
+		</if>
+		<if test="cadreReserve.appStatus!=null and cadreReserve.appStatus!=''">
+				and H.STATUS = #{cadreReserve.appStatus}
+		</if>
+		ORDER BY H.CREATE_DATE DESC
+	</select>
+	
+	<!--  功能说明:新增后备干部(head表)-->
+	<insert id="insertCadreReserveHead"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+		INSERT INTO T_RESERVE_HEAD(
+			VOUCHER_NO
+			<if test="appStatus != null and appStatus != ''">
+				,STATUS
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,ORG_ID
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,CREATER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+			<if test="remark != null and remark != ''">
+				,REMARK
+			</if>
+		) 
+		VALUES 
+		(
+				#{headId}
+			<if test="appStatus != null and appStatus != ''">
+				,#{appStatus}
+			</if>
+			<if test="orgId != null and orgId != ''">
+				,#{orgId}
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,#{createPer}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="remark != null and remark != ''">
+				,#{remark}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:新增后备干部(detail表)-->
+	<insert id="insertCadreReserveDetail"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+		INSERT INTO T_RESERVE_DETAIL(
+			ID,
+			VOUCHER_NO
+			<if test="empId != null and empId != ''">
+				,RECOMM_EMP_ID
+			</if>
+			<if test="recommendDate != null and recommendDate != ''">
+				,RECOMM_DATE
+			</if>
+			<if test="recommendDeptNO != null and recommendDeptNO != ''">
+				,RECOMM_DEPT
+			</if>
+			<if test="recommendReason != null and recommendReason != ''">
+				,RECOMM_REASON
+			</if>
+			<if test="recommendPersonId != null and recommendPersonId != ''">
+				,RECOMM_PER
+			</if>
+			<if test="recommendJob != null and recommendJob != ''">
+				,RECOMM_JOB
+			</if>
+			<if test="recommendBallot != null and recommendBallot != ''">
+				,RECOMM_TIC
+			</if>
+		) 
+		VALUES 
+		(
+				#{detailId},
+				#{headId}
+			<if test="empId != null and empId != ''">
+				,#{empId}
+			</if>
+			<if test="recommendDate != null and recommendDate != ''">
+				<![CDATA[,to_date(#{recommendDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="recommendDeptNO != null and recommendDeptNO != ''">
+				,#{recommendDeptNO}
+			</if>
+			<if test="recommendReason != null and recommendReason != ''">
+				,#{recommendReason}
+			</if>
+			<if test="recommendPersonId != null and recommendPersonId != ''">
+				,#{recommendPersonId}
+			</if>
+			<if test="recommendJob != null and recommendJob != ''">
+				,#{recommendJob}
+			</if>
+			<if test="recommendBallot != null and recommendBallot != ''">
+				,#{recommendBallot}
+			</if>
+		)	
+	</insert>
+	
+	<!--  功能说明:更新后备干部-->
+	<update id="updateCadreReserve"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+		UPDATE T_RESERVE_DETAIL
+			<set>
+				<if test="empId != null">
+					RECOMM_EMP_ID=#{empId},
+				</if>
+				<if test="recommendDate != null">
+					<![CDATA[RECOMM_DATE=to_date(#{recommendDate},'YYYY-MM-DD'),]]>
+				</if>
+				<if test="recommendDeptNO != null">
+					RECOMM_DEPT=#{recommendDeptNO},
+				</if>
+				<if test="recommendReason != null">
+					RECOMM_REASON=#{recommendReason},
+				</if>
+				<if test="recommendPersonId != null">
+					RECOMM_PER=#{recommendPersonId},
+				</if>
+				<if test="recommendJob != null">
+					RECOMM_JOB=#{recommendJob},
+				</if>
+				<if test="recommendBallot != null">
+					RECOMM_TIC=#{recommendBallot},
+				</if>
+			</set>
+		WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:根据id删除后备干部申请单（head)-->
+	<delete id="deleteCadreReserveHead" parameterType="java.lang.String">
+		DELETE FROM T_RESERVE_HEAD
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	<!--  功能说明:根据id删除后备干部申请单（detail)-->
+	<delete id="deleteCadreReserveDetail" parameterType="java.lang.String">
+		DELETE FROM T_RESERVE_DETAIL
+		WHERE VOUCHER_NO =#{headId}
+	</delete>
+	
+	<!--  功能说明:提交-->
+	<update id="submitCadreReserve"  parameterType="java.lang.String">
+				UPDATE T_RESERVE_HEAD
+					<set>
+							STATUS=1
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	<!--  功能说明:审批后备干部-->
+	<update id="approvCadreReserve"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+				UPDATE T_RESERVE_HEAD
+					<set>
+						<if test="appStatus != null">
+							STATUS=#{appStatus},
+						</if>
+						<if test="verifyPer != null">
+							VERIFY_PER=#{verifyPer},
+						</if>
+						<if test="verifyDate != null">
+						<![CDATA[VERIFY_DATE=to_date(#{verifyDate},'YYYY-MM-DD hh24:mi:ss'),]]>
+						</if>
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+   <!--  功能说明:不予审批后备干部（更新后备干部申请表appStatus）-->
+	<update id="updateAppStatus"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+				UPDATE T_RESERVE_HEAD
+					<set>
+						<if test="appStatus != null">
+							STATUS=#{appStatus},
+						</if>
+						<if test="verifyPer != null">
+							VERIFY_PER=#{verifyPer},
+						</if>
+						<if test="verifyDate != null">
+						<![CDATA[VERIFY_DATE=to_date(#{verifyDate},'YYYY-MM-DD hh24:mi:ss'),]]>
+						</if>
+					</set>
+				WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	   <!--  功能说明:不予审批后备干部（更新后备干部申请表未审批原因）-->
+	<update id="updateFailedReason"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+			UPDATE T_RESERVE_DETAIL
+			set
+					FAILED_REASON = #{failedReason}
+			WHERE VOUCHER_NO=#{headId}
+	</update>
+	
+	 <!--  功能说明:不予审批后备干部（录入后备干部人才库）-->
+	<insert id="denyCadreReserve"  parameterType="com.ustcsoft.system.model.CadreReserveVO">
+		INSERT INTO T_RESERVER(
+			T_RESERVER_ID,
+			APP_ID,
+			RECOMM_EMP_ID
+			<if test="recommendDate != null and recommendDate != ''">
+				,RECOMM_DATE
+			</if>
+			<if test="recommendDeptNO != null and recommendDeptNO != ''">
+				,RECOMM_DEPT
+			</if>
+			<if test="recommendReason != null and recommendReason != ''">
+				,RECOMM_REASON
+			</if>
+			<if test="recommendPersonId != null and recommendPersonId != ''">
+				,RECOMM_PER
+			</if>
+			<if test="recommendJob != null and recommendJob != ''">
+				,RECOMM_JOB
+			</if>
+			<if test="recommendBallot != null and recommendBallot != ''">
+				,RECOMM_TIC
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,CREATE_PER
+			</if>
+			<if test="createDate != null and createDate != ''">
+				,CREATE_DATE
+			</if>
+			<if test="failedReason != null and failedReason != ''">
+				,FAILED_REASON
+			</if>
+		) 
+		VALUES 
+		(
+			#{reserverId},
+			#{headId},
+			#{empId}
+			<if test="recommendDate != null and recommendDate != ''">
+				<![CDATA[,to_date(#{recommendDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="recommendDeptNO != null and recommendDeptNO != ''">
+				,#{recommendDept}
+			</if>
+			<if test="recommendReason != null and recommendReason != ''">
+				,#{recommendReason}
+			</if>
+			<if test="recommendPersonId != null and recommendPersonId != ''">
+				,#{recommendPersonId}
+			</if>
+			<if test="recommendJob != null and recommendJob != ''">
+				,#{recommendJob}
+			</if>
+			<if test="recommendBallot != null and recommendBallot != ''">
+				,#{recommendBallot}
+			</if>
+			<if test="createPer != null and createPer != ''">
+				,#{createPer}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				<![CDATA[,to_date(#{createDate},'YYYY-MM-DD hh24:mi:ss')]]>
+			</if>
+			<if test="failedReason != null and failedReason != ''">
+				,#{failedReason}
+			</if>
+		)	
+	</insert>
+</mapper>

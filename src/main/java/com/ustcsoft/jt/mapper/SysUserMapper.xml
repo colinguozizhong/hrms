@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.ustcsoft.jt.mapper.SysUserMapper">
+	 <!--  功能说明:根据条件查询人员-->
+	<select id="selectOrgUserPage" resultType="com.ustcsoft.system.model.SysUserVO" parameterType="com.ustcsoft.system.model.SysUserVO">
+		SELECT 
+		DISTINCT(a.USER_ID)
+		  , a.ORG_ID
+		  , a.NAME
+		  , a.USER_PWD
+		  , a.USER_NAME
+		  , a.SEX
+		  , a.TEL
+		  , a.EMAIL
+		  , b.ORG_NAME
+		  , a.SHEN_FEN_ZHENG_HAO as idNo
+		  ,a.IS_HAI_SHI
+		  ,a.login_type
+	      ,a.SYNC_FLAG
+	      ,a.SEQ      
+	      ,a.SEQ_STATUS
+	      ,a.ZHI_FA_ZHENG_HAO as zhiFaZhengHao
+	      ,a.ZHI_WU as zhiWu
+		FROM 
+		    M_USER a 
+		     LEFT JOIN M_ORG b ON a.ORG_ID = b.ORG_ID
+		     WHERE  
+<!-- 		     1=1 -->
+		     USER_NAME != 'admin'
+		     <if test="sysUser.chaXunFangShi == null or sysUser.chaXunFangShi == ''">
+		     	<choose>
+		     	<when test="sysUser.industryId != '' and sysUser.industryId != null and sysUser.areaId != '' and sysUser.areaId != null and sysUser.businessId !='' and sysUser.businessId != null">
+			      and (b.business_id like '${sysUser.searchBusinessId}%' or b.area_Id like '${sysUser.searchAreaId}%' or b.industry_Id like '${sysUser.searchIndustryId}%')
+			    </when>
+		     	<when test="sysUser.businessId != null and sysUser.businessId != ''">
+			       and b.business_id like '${sysUser.searchBusinessId}%'
+			    </when>
+			    <when test="sysUser.areaId != null and sysUser.areaId != ''">
+			     and b.area_Id like '${sysUser.searchAreaId}%'
+			    </when>
+			    <when test="sysUser.industryId != null and sysUser.industryId != ''">
+			     and b.industry_Id like '${sysUser.searchIndustryId}%'
+			    </when>
+			    </choose>
+		    </if>
+		    <if test="sysUser.chaXunFangShi == '01' ">
+		    	<choose>
+			    <when test="sysUser.industryId != '' and sysUser.industryId != null and sysUser.areaId != '' and sysUser.areaId != null and sysUser.businessId !='' and sysUser.businessId != null">
+			      and a.ORG_ID = #{sysUser.orgId}
+			    </when>
+		     	<when test="sysUser.businessId != null and sysUser.businessId != ''">
+			     and b.business_id = #{sysUser.businessId}
+			    </when>
+			    <when test="sysUser.areaId != null and sysUser.areaId != ''">
+			     and b.area_Id = #{sysUser.areaId}
+			    </when>
+			    <when test="sysUser.industryId != null and sysUser.industryId != ''">
+			     and b.industry_Id = #{sysUser.industryId}
+			    </when>
+			    </choose>
+		    </if>
+		    <if test="sysUser.chaXunFangShi == '02' ">
+		    	<choose>
+			     <when test="sysUser.industryId != '' and sysUser.industryId != null and sysUser.areaId != '' and sysUser.areaId != null and sysUser.businessId !='' and sysUser.businessId != null">
+			      and (b.business_id like '${sysUser.searchBusinessId}%' or b.area_Id like '${sysUser.searchAreaId}%' or b.industry_Id like '${sysUser.searchIndustryId}%')
+			      and (b.business_id !=#{sysUser.businessId} or b.area_Id !=#{sysUser.areaId} or b.industry_Id !=#{sysUser.industryId})
+			    </when>
+		     	<when test="sysUser.businessId != null and sysUser.businessId != ''">
+			     and b.business_id like '${sysUser.searchBusinessId}%'  and b.business_id !=#{sysUser.businessId}
+			    </when>
+			    <when test="sysUser.areaId != null and sysUser.areaId != ''">
+			     and b.area_Id like '${sysUser.searchAreaId}%' and b.area_Id !=#{sysUser.areaId}
+			    </when>
+			    <when test="sysUser.industryId != null and sysUser.industryId != ''">
+			     and b.industry_Id like '${sysUser.searchIndustryId}%' and b.industry_Id !=#{sysUser.industryId}
+			    </when>
+		    	</choose>
+		    </if>
+			<if test="sysUser.userName != null and sysUser.userName != ''">
+		      and   a.USER_NAME like '%${sysUser.userName}%'
+		    </if>
+		 	 <if test="sysUser.name != null and sysUser.name != ''">
+			   and  a.NAME like '%${sysUser.name}%'
+		    </if>
+			
+			<if test="sysUser.userOrgId != null and sysUser.userOrgId != ''">
+		       and a.ORG_ID = #{sysUser.userOrgId }
+		    </if>
+		 	
+		 	<if test="sysUser.idNo != null and sysUser.idNo != ''">
+			  and a.SHEN_FEN_ZHENG_HAO like '%${sysUser.idNo}%'
+		    </if>
+			<if test="sysUser.tel != null and sysUser.tel  != ''">
+		        and a.TEL like '%${sysUser.tel}%'
+		    </if>
+		order by a.USER_ID  desc
+	</select>
+	
+	 <!--  功能说明:根据条件查询人员(非管理员)-->
+	<select id="selectOrgUserNotAdminPage" resultType="com.ustcsoft.system.model.SysUserVO" parameterType="com.ustcsoft.system.model.SysUserVO">
+		SELECT 
+		DISTINCT(a.USER_ID)
+		  , a.ORG_ID
+		  , a.NAME
+		  , a.USER_PWD
+		  , a.USER_NAME
+		  , a.SEX
+		  , a.TEL
+		  , a.EMAIL
+		  , b.ORG_NAME
+		  , a.SHEN_FEN_ZHENG_HAO as idNo
+		  ,a.IS_HAI_SHI
+		  ,a.login_type
+	      ,a.SYNC_FLAG
+	      ,a.SEQ      
+	      ,a.SEQ_STATUS 
+		FROM 
+		    M_USER a 
+		     LEFT JOIN M_ORG b ON a.ORG_ID = b.ORG_ID
+		     WHERE   1=1 AND a.USER_ID != '1000000000000001'
+		     <if test="sysUser.orgId != null and sysUser.orgId != ''">
+			     and a.ORG_ID = #{sysUser.orgId}
+		    </if>
+<!-- 			<if test="sysUser.deptId != null and sysUser.deptId != ''"> -->
+<!-- 			   and  c.DEPT_ID = #{sysUser.deptId} -->
+<!-- 		    </if> -->
+			<if test="sysUser.userName != null and sysUser.userName != ''">
+		      and   a.USER_NAME like '%${sysUser.userName}%'
+		    </if>
+		 	 <if test="sysUser.name != null and sysUser.name != ''">
+			    and a.NAME like '%${sysUser.name}%'
+		    </if>
+			
+			<if test="sysUser.userOrgId != null and sysUser.userOrgId != ''">
+		       and a.ORG_ID = #{sysUser.userOrgId }
+		    </if>
+		 	
+		 	<if test="sysUser.idNo != null and sysUser.idNo != ''">
+			    and  a.SHEN_FEN_ZHENG_HAO like '%${sysUser.idNo}%'
+		    </if>
+			<if test="sysUser.tel != null and sysUser.tel  != ''">
+		       and a.TEL like '%${sysUser.tel}%'
+		    </if>
+		order by a.ORG_ID asc
+	</select>
+	
+	<select id="findUserByOrgId" resultType="com.ustcsoft.system.model.SysUserVO" parameterType="com.ustcsoft.system.model.SysUserVO">
+			SELECT
+		    O.ORG_ID orgId,
+		    O.PARENT_ID parentId,
+		    O.ORG_NAME orgName,
+		    O.ORG_SIMPLENAME orgSimpleName,
+		    O.ORG_CODE orgCode,
+		    O.REMARK remark,
+			O.MANAGER manager,
+			O.CONTACT_PERSON contactPerson,
+			O.CONTACT_TEL contactTel,
+			O.EMAIL email,
+			O.STATUS STATUS,
+			O.WANG_ZHI website,
+			O.DI_ZHI address,
+			O.JI_GOU_ZHI_NENG FUNCTION,
+			O.ORG_LV orgLv,
+			O.HANG_YE_ID tradeType,
+			O.DU_LI_ZHI_FA duLiZhiFa,
+			O.PARENT_BUSINESS_ID parentBusinessId,
+			O.REG_CODE regCode,
+			O.PEOPLE_GOVERNMENT government,
+			O.YOU_BIAN AS youBian,
+			O.JIAN_CE_ZHAN_HAO jianCeZhanHao
+		FROM
+		    M_ORG O
+		WHERE
+		    O.ORG_ID = #{orgId}
+	</select>
+	
+	 <!-- 查询醉的用户ID-->
+    <select id="findMaxUserId"   resultType="java.lang.String" >
+	select  max(O.USER_ID) 
+	       FROM 
+		   M_USER O 	
+	</select>
+	
+		<!--  功能说明:查询人员-->
+		<select id="querySysUserById" resultType="com.ustcsoft.system.model.SysUserVO" 
+		parameterType="com.ustcsoft.system.model.SysUserVO" >
+			SELECT 
+				DISTINCT(a.USER_ID)        
+			  , a.ORG_ID
+			  , a.NAME
+			  , a.USER_PWD
+			  , a.USER_NAME
+			  , a.SEX
+			  , a.SHEN_FEN_ZHENG_HAO  as idNo
+			  , a.TEL
+			  , a.EMAIL
+			  , b.ORG_NAME
+	          , a.ZHI_FA_ZHENG_HAO
+			FROM 
+			    M_USER a		  
+			left join M_ORG b on a.ORG_ID = b.ORG_ID         
+			WHERE
+				a.USER_ID=#{sysUser.userId}
+		</select>
+	
+		<!--  功能说明:新增人员-->
+	<insert id="insertSysUser"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		insert into M_user(
+					USER_ID,
+					USER_NAME,
+					USER_PWD,
+					NAME,
+					ORG_ID,
+					SEX,
+					SHEN_FEN_ZHENG_HAO,
+					TEL,
+					EMAIL,
+					DEPT_ID,
+					CERT_ID,
+					ZFRYBH,
+					ZHI_WU,
+					LOGIN_TYPE,
+					LOGIN_TIME
+		                ) values 
+	        	   (
+				   #{sysUser.userId},
+				   #{sysUser.userName},
+				   #{sysUser.userPwd},
+				   #{sysUser.name},
+				   #{sysUser.orgId},
+				   #{sysUser.sex},
+				   #{sysUser.idNo},
+				   #{sysUser.tel},
+				   #{sysUser.email},
+				   #{sysUser.deptId},
+				   #{sysUser.certId},
+				   #{sysUser.zfrybh},
+				   #{sysUser.zhiWu},
+				   #{sysUser.loginType},
+				   #{sysUser.loginTime}
+	              )	
+	</insert>
+	
+	
+	<!-- 更新用户-->
+	<update id="updateUser" parameterType="com.ustcsoft.system.model.SysUserVO"> 
+  		update M_USER set 
+		           		 USER_NAME=#{sysUser.userName}
+		     		 	,NAME=#{sysUser.name}
+		     			,SEX=#{sysUser.sex}
+		     			,SHEN_FEN_ZHENG_HAO=#{sysUser.idNo}
+		     			,TEL=#{sysUser.tel}
+		     			,EMAIL=#{sysUser.email}
+		     			,ZHI_WU=#{sysUser.zhiWu}
+		     <if test="sysUser.deptId != null and sysUser.deptId != ''"> 
+		     			,DEPT_ID=#{sysUser.deptId}
+		     </if>
+		     <if test="sysUser.orgId != null and sysUser.orgId != ''"> 
+		     			,ORG_ID=#{sysUser.orgId}
+		     </if>
+		     <if test="sysUser.certId != null and sysUser.certId != ''">
+		     			,CERT_ID=#{sysUser.certId}
+		      </if>
+		      <if test="sysUser.zfrybh != null and sysUser.zfrybh != ''">
+		     			,ZFRYBH=#{sysUser.zfrybh}
+		      </if>
+	 	where
+				USER_ID = #{sysUser.userId}
+	</update>
+	
+	
+	<!-- 删除用户-->
+	<delete id="deleteSysUser"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		delete from  M_USER where 
+				           USER_ID = #{sysUser.userId}
+	</delete>
+ 	<!-- 删除签章图片记录--> 
+<!-- 	<delete id="deleteDZQZTP" parameterType="com.ustcsoft.system.model.SysUserVO"> -->
+<!-- 当删除用户时只标识该签章已删除，因已做案件需要加载签过的图片--> 
+<!-- 		update XZZF_J_DZQZTP  -->
+<!-- 		set DELETEFLAG='01' -->
+<!-- 		where USER_DZQZTP = #{sysUser.userId} -->
+	<!-- delete from  XZZF_J_DZQZTP where  -->
+<!-- 				           USER_DZQZTP = #userId#  --> 
+<!-- 	</delete> -->
+	
+
+	<!-- 删除用户-角色-->
+	<delete id="deleteSysUserRoleByUserId"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		delete from  M_USER_ROLE where 
+				           USER_ID = #{sysUser.userId}
+	</delete>
+
+	<!-- 删除用户-菜单-->
+	<delete id="deleteSysUserMenuByUserId"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		delete from  M_USER_MENU where 
+				           USER_ID = #{sysUser.userId}
+	</delete>
+	
+	<!--  功能说明:删除个人用户的签章授权-->
+	<delete id="deleteSelectSignByUserId"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		delete from Signature_authority where USER_ID = #{sysUser.userId} 
+	</delete>
+	<!--  功能说明:根据signid删除签章记录
+	<delete id="deleteSelectSignBySignId"  parameterType="com.ustcsoft.system.model.SysUserVO">
+		delete from Signature_authority where SIGN_ID = #{sysUser.signId} 
+	</delete>-->
+	
+	<!-- 重置密码-->
+	<update id="resetPassword"  parameterType="com.ustcsoft.system.model.SysUserVO">    
+		   update 
+		   		M_USER
+		   set
+		   		USER_PWD = #{sysUser.userPwd}
+		   where 
+		   		USER_ID = #{sysUser.userId} 
+    </update>
+	
+	
+	
+	
+	 <!--功能说明：更新电子签章密码和用户登录密码相同 -->
+<!--     <update id="updateSignPassword" parameterType="com.ustcsoft.system.model.SysUserVO"> -->
+<!--     	UPDATE  -->
+<!--     		XZZF_J_DZQZTP  -->
+<!--     	SET  -->
+<!--     		QIAN_ZHANG_MI_MA = #{sysUser.userPwd} -->
+<!--     	WHERE  -->
+<!--     		USER_DZQZTP =#{sysUser.userId}  -->
+<!--     </update> -->
+	
+	
+	<!--获取未签章列表 -->
+	<select id="findUnSelectSignListPage" resultType="com.ustcsoft.system.model.SignDataVO" parameterType="java.lang.String">
+	select qz.QIAN_ZHANG_HAO as signId
+		,qz.XING_MING as signName
+		,qz.QIAN_ZHANG_LEI_BIE  as signType
+		from m_user u
+			inner join XZZF_J_DZQZTP qz on u.USER_id= qz.USER_DZQZTP
+			where  u.ORG_ID = #{orgId}
+					and qz.QIAN_ZHANG_HAO not in (select sign_id from Signature_authority where user_id=#{userId})
+		order by  qz.QIAN_ZHANG_LEI_BIE ASC
+	</select>
+	
+	<!--获取已签章列表 -->
+	<select id="findSelectSignListPage" resultType="com.ustcsoft.system.model.SignDataVO"  parameterType="com.ustcsoft.system.model.SignDataVO">
+			select sa.sign_id as signId, 
+				sa.sign_type as signType,
+				qz.XING_MING as signName,
+				mo.org_name as createrOrgName,
+				qz.ZHI_FA_ZHENG_HAO	as zhiFaZhengHao,
+				qz.USER_DZQZTP as userDzqztp,
+				USER.NAME as createrName,
+				case  when sub.orgId is null then '0'  else '1' end as deleteAuth,
+				qz.ZHU_JIAN_ID as qianZhangId
+				from Signature_authority sa
+			left join XZZF_J_DZQZTP qz on sa.sign_id= qz.QIAN_ZHANG_HAO and qz.DELETEFLAG='00'
+			left join M_USER USER on sa.CREATER=USER.USER_ID
+			left join m_org mo on mo.org_id = sa.creater_orgid
+			left join (SELECT O.ORG_ID as orgId,O.BUSINESS_ID as businessId FROM M_ORG AS O WHERE O.BUSINESS_ID LIKE '${signData.businessId}%') sub
+			 	on sub.orgId=sa.creater_orgid
+			 where 
+			 <if test="signData.userId != null and signData.userId != ''">
+		       sa.user_id=#{signData.userId}
+		     </if>
+			 <if test="signData.signType != null and signData.signType != ''">
+		       and	sa.sign_type = #{signData.signType}
+		     </if>
+			 <if test="signData.createrOrgid and signData.createrOrgid != ''">
+		        and	sa.CREATER_ORGID = #{signData.createrOrgid}
+		     </if>
+			
+			 order by  sa.sign_type ASC
+	</select>
+	
+	<!--查找businessId -->
+	<select id="findBusinessId" resultType="java.lang.String"  parameterType="java.lang.String">
+		select business_id from m_org where org_id=#{orgId}
+    </select>
+    
+    <!--  功能说明:新增签章授权-->
+	<insert id="insertSelectSign"  parameterType="com.ustcsoft.system.model.SignDataVO">
+		insert into Signature_authority(USER_ID,SIGN_ID,SIGN_TYPE,CREATER,CREATER_ORGID,CREATETIME)
+		values(#{signData.userId},#{signData.signId},(select QIAN_ZHANG_LEI_BIE from XZZF_J_DZQZTP where QIAN_ZHANG_HAO=#{signData.signId} and DELETEFLAG='00')
+		,#{signData.creater},#{signData.createrOrgid},#{signData.createTime})
+	</insert>
+	
+	<!--  功能说明:删除签章授权-->
+	<delete id="deleteSelectSign" parameterType="com.ustcsoft.system.model.SignDataVO">
+		delete from Signature_authority where USER_ID = #{signData.userId} and  SIGN_ID = #{signData.signId}
+	</delete>
+	<!--  功能说明:签章的vo-->
+	<select id="selectByfileId" parameterType="java.lang.String" resultType="com.ustcsoft.system.model.XzzfJDzqztpVO">
+	SELECT	ZHU_JIAN_ID			as zhuJianId,
+			QIAN_ZHANG_HAO		as qianZhangHao,
+			QIAN_ZHANG_MI_MA	as qianZhangMiMa,
+			XING_MING			as xingMing,
+			ZHI_FA_ZHENG_HAO	as zhiFaZhengHao,
+			TU_PIAN_MING		as tuPianMing,
+			TU_PIAN_DI_ZHI		as tuPianDiZhi,
+			QIAN_ZHANG_LEI_BIE	as qianZhangLeiBie
+	FROM	XZZF_J_DZQZTP
+	<!--INNER JOIN (SELECT USER_ID FROM M_USER WHERE USER_NAME = #qianZhangHao:VARGRAPHIC# ) M 
+			ON M.USER_ID = QIAN_ZHANG_HAO-->
+	WHERE	DELETEFLAG = '00'
+	and QIAN_ZHANG_HAO = #{fileId}
+	</select>
+</mapper>
